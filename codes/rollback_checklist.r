@@ -32,7 +32,7 @@ oxcgrtdata <- oxcgrtdata %>% arrange(CountryCode, Date) %>% group_by(CountryCode
   mutate(moveave_confirmedcases = zoo::rollmean(ConfirmedCases, k = 7, fill = NA, align = 'right')) %>%
   mutate(lag_moveave_cases = lag(moveave_confirmedcases, order_by = Date), 
          newcases = moveave_confirmedcases - lag_moveave_cases, 
-         cases_controlled = ifelse((50-newcases)/50 > 0, (50-newcases)/50, 0)) 
+         cases_controlled = ifelse((50-newcases)/50 > 0, (50-newcases)/50, 0)) ##FROM TOBY: I can't quite tell if you have handled this elsewhere, but you may need to account for cases that will end up >1. This can occur in uncommon instance where countries revise down their count, giving "negative" newcases.
 
 
 ### define test and trace indicators
@@ -46,7 +46,7 @@ oxcgrtdata <- oxcgrtdata %>% arrange(CountryCode, Date) %>% group_by(CountryCode
 oxcgrtdata <- oxcgrtdata %>% arrange(Date, CountryCode) %>% group_by(Date) %>%
   mutate(min_tests = min(test_percase, na.rm = T), 
          max_tests = max(test_percase, na.rm = T)) %>%
-  mutate(test_score = (log(test_percase) - log(min_tests))/(log(max_tests) - log(min_tests)))
+  mutate(test_score = (log(test_percase) - log(min_tests))/(log(max_tests) - log(min_tests))) 
 
 oxcgrtdata <- oxcgrtdata %>% group_by(Date) %>% mutate(global_mean_test_score = mean(test_score, na.rm = T)) %>% 
        mutate(test_score = ifelse(is.na(test_score) == T, global_mean_test_score, test_score)) %>%
@@ -71,6 +71,7 @@ oxcgrtdata <- oxcgrtdata %>% ungroup() %>%
 #' CODE CORRECTION NOTE - Taking min at each date for time series purposes. Stata Code takes 
 #' global(within country until date) min of google_ave and apple_ave, before taking
 #'  min between these 
+          ##FROM TOBY: this is also worth noting of the min/max range for tests above.
 
 #oxcgrtdata %>% arrange(CountryCode, Date) %>% group_by(CountryCode) %>%
 #  mutate(min_google = sapply(Date, function(x) min(google_ave[between(Date, x-2, x)])))
@@ -86,6 +87,8 @@ oxcgrtdata <- oxcgrtdata %>% mutate(mob = pmin(google_ave, apple_ave, na.rm = T)
                                       mob > 120 & (is.na(mob) == F) ~ 120))
 
 #NA handling of mob - what happens when mob is 0? codebook says metric is left blank. Which metric? - confirm
+##FROM TOBY:  are there cases of mob=0?? If so, then I guess it is <20 and would be treated as 20 for this equation. But 0 seems implausibly low... the absolute zero of mobility! 
+##            More likely is a null value, where google_ave and apple_ave are empty for a particular country. In which case we do not report a community_understanding metric, we leave it blank.
 
 oxcgrtdata <- oxcgrtdata %>% mutate(community_understanding = 0.5*cases_controlled + (1-0.5*cases_controlled)*(120-mob)/100) %>%
   mutate(community_understanding = ifelse(H1_Public.info_1!=2, 0, community_understanding)) 
