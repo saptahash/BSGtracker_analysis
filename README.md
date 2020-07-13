@@ -27,6 +27,21 @@ Distribution of Rollback scores over time
 #### Testing new graph plot window
 ![Scatter SI vs Rollback](/graphs/detail_scatterSIroll2020-06-28.png)
 
-![Scatter SI vs Rollback](/graphs/summary_scatterSIroll2020-06-28.png)
+![Scatter SI vs Rollback](/graphs/summary_scatterSIroll2020-06-28.png) 
+
+### Heatmaps of rollback scores of countries over time 
+![Tile map East Asia Pacific](./graphs/tilemap2020-06-28_East_Asia_Pacific.png)
+
+![Tile map Europe Central Asia](./graphs/tilemap2020-06-28_Europe_Central_Asia.png)
+
+![Tile map LatAm Carribean](./graphs/tilemap2020-06-28_Latin_America_Caribbean.png)
+
+![Tile map MENA](./graphs/tilemap2020-06-28_Middle_East_North_Africa.png)
+
+![Tile map N.America](./graphs/tilemap2020-06-28_North_America.png)
+
+![Tile map South Asia](./graphs/tilemap2020-06-28_South_Asia.png)
+
+![Tile map Subsaharan Africa](./graphs/tilemap2020-06-28_sub_Saharan_Africa.png)
 
 
