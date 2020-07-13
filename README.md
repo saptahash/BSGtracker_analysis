@@ -44,4 +44,7 @@ Distribution of Rollback scores over time
 
 ![Tile map Subsaharan Africa](./graphs/tilemap2020-06-28_sub_Saharan_Africa.png)
 
+### Chloropleth maps of rollback scores of countries over time
+
+![Chloropleth maps of rollback]((./graphs/chloropleth_2020-06-28.png)
 
