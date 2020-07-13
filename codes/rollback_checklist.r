@@ -12,10 +12,9 @@ pwd <- 'C:/Users/sapta/OneDrive/Desktop/projects/oxfordcgrt/analysis/toby'
 # set WD
 setwd(pwd)
 
-# read in Oxgrt file
+# read in base csv file
 oxcgrtdata <- read.csv(file = paste("./OxCGRT_", data_date, ".csv", sep = ""), stringsAsFactors = FALSE)
 #oxcgrtdata <- read.csv("./OxCGRT_2020-06-25.csv", stringsAsFactors = FALSE)
-#oxcgrtdata <- haven::read_dta("./OxCGRT_20200629.dta")
 
 # Filling in gaps in indicators
 oxcgrtdata <- oxcgrtdata %>% arrange(CountryCode, Date) %>% group_by(CountryCode) %>%
@@ -62,18 +61,15 @@ oxcgrtdata <- oxcgrtdata %>% mutate(manage_imported_cases = C8_International_1/4
 
 ### Behaviour change and community engagement
 
-# ISSUE - no apple_ave or google_ave variable from previous code
+# ISSUE(FIXED) - no apple_ave or google_ave variable from previous code
 # Code correction notes - creating them now for completion - to be removed later
-oxcgrtdata <- oxcgrtdata %>% ungroup() %>% 
-  mutate(apple_ave = rowMeans(oxcgrtdata[,c("week_apple_transit", "week_apple_driving", "week_apple_walking")]), 
-         google_ave = rowMeans(oxcgrtdata[,c("week_goog_retail", "week_goog_transitstations", "week_goog_workplaces")]))
+#oxcgrtdata <- oxcgrtdata %>% ungroup() %>% 
+#  mutate(apple_ave = rowMeans(oxcgrtdata[,c("week_apple_transit", "week_apple_driving", "week_apple_walking")]), 
+#         google_ave = rowMeans(oxcgrtdata[,c("week_goog_retail", "week_goog_transitstations", "week_goog_workplaces")]))
 
-#' CODE CORRECTION NOTE - Taking min at each date for time series purposes. Stata Code takes 
+#' CODE CORRECTION NOTE (FIXED) - Taking min at each date for time series purposes. Stata Code takes 
 #' global(within country until date) min of google_ave and apple_ave, before taking
 #'  min between these 
-
-#oxcgrtdata %>% arrange(CountryCode, Date) %>% group_by(CountryCode) %>%
-#  mutate(min_google = sapply(Date, function(x) min(google_ave[between(Date, x-2, x)])))
 
 oxcgrtdata <- oxcgrtdata %>% arrange(CountryCode, Date) %>% group_by(CountryCode) %>% 
   mutate(min_google = roll_min(google_ave, n = 28L, align = "right", fill = NA), 
