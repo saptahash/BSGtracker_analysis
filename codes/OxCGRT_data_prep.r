@@ -41,15 +41,10 @@ oxcgrtdata <- oxcgrtdata %>%
 oxcgrtdata <- oxcgrtdata %>% select(-starts_with("M1"),-ends_with("Notes"))
 
 #change date variable to date format 
-glimpse(oxcgrtdata)
-
-#change to date format
 oxcgrtdata <- oxcgrtdata %>% mutate(Date = ymd(Date)) %>% subset(Date < data_date)
 
-#BUG 1 NOTE - until here, no duplicates
+# attach region labels
 
-
-'''
 East_Asia_Pacific <<- c("ASM", "AUS", "BRN", "CHN", "FJI", "FSM", "GUM", "HKG", "IDN", "JPN", "KHM", "KIR", "KOR", "LAO", "MAC", "MHL", "MMR", "MNG", "MNP", "MYS", "NCL", "NRU", "NZL", "PHL", "PLW", "PNG", "PRK", "PYF", "SGP", "SLB", "THA", "TLS", "TON", "TUV", "TWN", "VNM", "VUT", "WSM")
 Europe_Central_Asia <<- c("ALB", "AND", "ARM", "AUT", "AZE", "BEL", "BGR", "BIH", "BLR", "CHE", "CHI", "CYP", "CZE", "DEU", "DNK", "ESP", "EST", "FIN", "FRA", "FRO", "GBR", "GEO", "GIB", "GRC", "GRL", "HRV", "HUN", "IMN", "IRL", "ISL", "ITA", "KAZ", "KGZ", "LIE", "LTU", "LUX", "LVA", "MCO", "MDA", "MKD", "MNE", "NLD", "NOR", "POL", "PRT", "ROU", "RUS", "SMR", "SRB", "SVK", "SVN", "SWE", "TJK", "TKM", "TUR", "UKR", "UZB", "RKS")
 Latin_America_Caribbean <<- c("ABW", "ARG", "ATG", "BHS", "BLZ", "BOL", "BRA", "BRB", "CHL", "COL", "CRI", "CUB", "CUW", "CYM", "DMA", "DOM", "ECU", "GRD", "GTM", "GUY", "HND", "HTI", "JAM", "KNA", "LCA", "MAF", "MEX", "NIC", "PAN", "PER", "PRI", "PRY", "SLV", "SUR", "SXM", "TCA", "TTO", "URY", "VCT", "VEN", "VGB", "VIR")
@@ -59,43 +54,17 @@ South_Asia <<- c("AFG", "BGD", "BTN", "IND", "LKA", "MDV", "NPL", "PAK")
 sub_Saharan_Africa <<- c("AGO", "BDI", "BEN", "BFA", "BWA", "CAF", "CIV", "CMR", "COD", "COG", "COM", "CPV", "ERI", "ETH", "GAB", "GHA", "GIN", "GMB", "GNB", "GNQ", "KEN", "LBR", "LSO", "MDG", "MLI", "MOZ", "MRT", "MUS", "MWI", "NAM", "NER", "NGA", "RWA", "SDN", "SEN", "SLE", "SOM", "SSD", "STP", "SWZ", "SYC", "TCD", "TGO", "TZA", "UGA", "ZAF", "ZMB", "ZWE")
 region_list <<- c("East_Asia_Pacific", "Europe_Central_Asia", "Latin_America_Caribbean", "Middle_East_North_Africa", "North_America", "South_Asia", "sub_Saharan_Africa")
 
-oxcgrtdata <- oxcgrtdata %>% mutate(region = "")
-countrycode <- oxcgrtdata %>% select(CountryCode) %>% mutate(region = "")
+oxcgrtdata$region <- NA
 
-
-View(countrycode %>% select(CountryCode, region) %>% filter(CountryCode %in% get("East_Asia_Pacific")) %>% mutate(region = "East_Asia_Pacific") )
-  
 for(reg in region_list){
   regional <- get(reg)
-  #print(region)
-  countrycode %>% select(CountryCode, region) %>% filter(CountryCode %in% regional) %>% mutate(region = reg)
-  #countrycode %>% select(CountryCode) %>% filter(CountryCode %in% regionlist) %>% count(CountryCode)
+  oxcgrtdata <- oxcgrtdata %>% mutate(region = ifelse(CountryCode %in% regional, reg, region))
 }
 
-for(reg in region_list){
-  reg <- get(reg)
-  for(country in reg){
-    print(country)
-  }  
-}
-'''
-
-#Failed to create income labels and continents 
 
 write.csv(oxcgrtdata, file = paste("OxCGRT_", data_date, ".csv", sep = ""))
 
 #Stata diff: Not pulling JHU data -> confirm w/ Toby
-
-
-
-
-
-
-
-
-
-
-
 
 ##   Bringing in Apple and Google Mobility Data
 
@@ -129,7 +98,6 @@ google.mobility <- google.mobility %>% rename(goog_retail = starts_with("retail"
 
 google.mobility <- google.mobility %>% filter(is.na(sub_region_1))
 
-#BUG FOUND - Duplicates exist here - drop subregion!= NA
 dir.create(file.path(pwd, "working"))
 write.csv(google.mobility, file = paste("./working/googlemobility_", data_date, ".csv", sep = ""))
 
@@ -165,7 +133,7 @@ apple.mobility <- apple.mobility %>% pivot_longer(-c(transportation_type, countr
        mutate(date = ymd(date)) %>% 
        rename(apple_driving = driving, apple_walking = walking, apple_transit = transit) 
 #is there a more efficient way to do this without two pivots?
-#BUG 1 NOTE - no duplicates here
+
 write.csv(apple.mobility, file = paste("./working/applemobility_", data_date, ".csv", sep = ""))
 
 
@@ -225,8 +193,9 @@ oxcgrtdata <- oxcgrtdata %>% arrange(CountryCode, Date) %>%
 
 oxcgrtdata <- oxcgrtdata %>% ungroup() %>% 
   mutate(apple_ave = rowMeans(oxcgrtdata[,c("week_apple_transit", "week_apple_driving", "week_apple_walking")]), 
-         google_ave = rowMeans(oxcgrtdata[,c("week_goog_retail", "week_goog_transitstations", "week_goog_workplaces")])) %>%
-  mutate(mobility_ave = rowMeans(oxcgrtdata[,c("apple_ave", "google_ave")]))
+         google_ave = rowMeans(oxcgrtdata[,c("week_goog_retail", "week_goog_transitstations", "week_goog_workplaces")])) 
+
+oxcgrtdata <- oxcgrtdata %>% ungroup() %>% mutate(mobility_ave = rowMeans(oxcgrtdata[,c("apple_ave", "google_ave")]))
 
 write.csv(oxcgrtdata, file = paste("./OxCGRT_", data_date, ".csv", sep = ""))
 
@@ -292,43 +261,46 @@ write.csv(oxcgrtdata, file = paste("./OxCGRT_", data_date, ".csv", sep = ""))
 
 
 
-################## ROUGH NOTEBOOK CODE
-
-#oxcgrtdata <- 
-
-#doing rowmeans first 
-oxcgrtdata %>% arrange(CountryCode, Date) %>% rowMeans(apple_transit)
- 
-View(oxcgrtdata %>% ungroup() %>%
-mutate(apple_ave = rowMeans(oxcgrtdata[,c("week_apple_transit", "week_apple_driving", "week_apple_walking")])))
+#################### 
+###### ROUGH CODE - DO NOT RUN
+####################
 
 
-
-
-
-
-View(oxcgrtdata %>% arrange(CountryCode, Date) %>%
-       mutate_all(stats::filter(select(starts_with("apple")), rep(1/7,7), sides = 2)))
-
-View(oxcgrtdata %>% mutate_at(.funs = list(wk = )))
-
-View(oxcgrtdata %>% arrange(CountryCode, Date) %>% select(apple_transit) %>%
-  mutate(wk_apple_transit = stats::filter(rep(1/7,7), sides = 2)))
-
-apple.transit <- oxcgrtdata %>% arrange(CountryCode, Date) %>% pull(apple_transit)
-
-View(oxcgrtdata %>% arrange(CountryCode, Date))
-
-
-
-View(oxcgrtdata %>% arrange(CountryCode, Date) %>%
-     mutate(week_apple_transit = rollmean(apple_transit, k=3, fill = NA)))
-
-View(stats::filter(oxcgrtdata %>% select(starts_with("apple")), rep(1/7,7), sides = 2))
-#check NA handling for these functions
-
-glimpse(oxcgrtdata)
-glimpse(google.mobility)
+# #oxcgrtdata <- 
+# 
+# #doing rowmeans first 
+# oxcgrtdata %>% arrange(CountryCode, Date) %>% rowMeans(apple_transit)
+#  
+# View(oxcgrtdata %>% ungroup() %>%
+# mutate(apple_ave = rowMeans(oxcgrtdata[,c("week_apple_transit", "week_apple_driving", "week_apple_walking")])))
+# 
+# 
+# 
+# 
+# 
+# 
+# View(oxcgrtdata %>% arrange(CountryCode, Date) %>%
+#        mutate_all(stats::filter(select(starts_with("apple")), rep(1/7,7), sides = 2)))
+# 
+# View(oxcgrtdata %>% mutate_at(.funs = list(wk = )))
+# 
+# View(oxcgrtdata %>% arrange(CountryCode, Date) %>% select(apple_transit) %>%
+#   mutate(wk_apple_transit = stats::filter(rep(1/7,7), sides = 2)))
+# 
+# apple.transit <- oxcgrtdata %>% arrange(CountryCode, Date) %>% pull(apple_transit)
+# 
+# View(oxcgrtdata %>% arrange(CountryCode, Date))
+# 
+# 
+# 
+# View(oxcgrtdata %>% arrange(CountryCode, Date) %>%
+#      mutate(week_apple_transit = rollmean(apple_transit, k=3, fill = NA)))
+# 
+# View(stats::filter(oxcgrtdata %>% select(starts_with("apple")), rep(1/7,7), sides = 2))
+# #check NA handling for these functions
+# 
+# glimpse(oxcgrtdata)
+# glimpse(google.mobility)
 
 
 
