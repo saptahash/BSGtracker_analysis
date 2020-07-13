@@ -23,5 +23,13 @@ Distribution of Rollback scores over time
 ##### 24th June 2020
 ![Rollback scores as of 15-04-2020](/graphs/rollback_hist2020-06-24.png)
 
+### Stringency Index vs Rollback Readiness 
+
+### 28th June 2020
+![Scatter plot as of 28th June](/graph/detail_scatterSIroll2020-06-28.png)
+
+### Summary plot since April 2020
+![Summary plot since April](/graph/summary_scatterSIroll2020-06-28.png)
+
 
 
