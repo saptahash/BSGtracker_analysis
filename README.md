@@ -27,7 +27,7 @@ Distribution of Rollback scores over time
 #### Testing new graph plot window
 <!---[Scatter SI vs Rollback](/graphs/detail_scatterSIroll2020-06-28.png)--->
 
-<img src="/graphs/detail_scatterSIroll2020-06-28.png" width="700">
+<img src="/graphs/detail_scatterSIroll2020-06-28.png" width="625">
 
 <!---[Scatter SI vs Rollback](/graphs/summary_scatterSIroll2020-06-28.png)--->
 
