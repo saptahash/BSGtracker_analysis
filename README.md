@@ -63,4 +63,6 @@
 
 ![Chloropleth maps of rollback](./graphs/chloropleth_2020-06-28.png)
 
+### Line plots of Stringency Index and Rollback readiness
 
+![Lineplots of key countries](./graphs/lineplot_2020-06-28.png)
