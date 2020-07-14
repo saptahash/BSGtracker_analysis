@@ -52,7 +52,7 @@ Distribution of Rollback scores over time
 
 ![Chloropleth maps of rollback](./graphs/chloropleth_2020-06-28.png)
 
-### Chloropleth maps of rollback scores of countries over time
+### Chloropleth maps of rollback scores of countries (latest)
 
 ![Chloropleth maps of rollback](./graphs/dailychloropleth_2020-06-28.png)
 
