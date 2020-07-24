@@ -1,6 +1,8 @@
-####OxCGRT 
+##################################################################
+#### Oxford Coronavirus Response Tracker (OxCGRT) @ BSG #################
+##################################################################
 
-########File 1 to import and process data exported from OxCGRT database 
+### Import and process data exported from OxCGRT database 
 
 
 library(readr)
@@ -10,21 +12,20 @@ library(lubridate)
 library(countrycode)
 library(zoo)
 
-pwd <<- "C:/Users/sapta/OneDrive/Desktop/projects/oxfordcgrt/analysis/toby"
+#pwd <<- "C:\Users\sapta\OneDrive\Desktop\oxcgrtRA\BSGtracker_analysis\codes"
 data_date <<- today()
 url_oxcgrt <<- "https://raw.githubusercontent.com/OxCGRT/covid-policy-tracker/master/data/OxCGRT_latest_withnotes.csv"
 
-setwd(pwd)
+#setwd(pwd)
 oxcgrtdata <- read_csv(url(url_oxcgrt))
 #notes - save backup at this point 
-
 
 #Step 2: Bringing in crossnational correlates
 correlates <- c("popWB",  "hosp_beds_WB", "total_sars", "sars_deaths",
                 "total_mers", "h1n1_death_estimate_25pctile",
                 "h1n1_death_estimate_75pctile", "pop_in_cities")
 
-crossnationaldata <- read_dta("./crossnationaldata.dta") #note - new version stata file
+crossnationaldata <- read_dta("../data/input/crossnationaldata.dta") #note - new version stata file
 
 correlatesdata <- crossnationaldata %>% select(countrycode, popWB, hosp_beds_WB,
                                                total_sars, sars_deaths, total_mers,
@@ -62,7 +63,7 @@ for(reg in region_list){
 }
 
 
-write.csv(oxcgrtdata, file = paste("OxCGRT_", data_date, ".csv", sep = ""))
+write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", sep = ""))
 
 #Stata diff: Not pulling JHU data -> confirm w/ Toby
 
@@ -71,9 +72,6 @@ write.csv(oxcgrtdata, file = paste("OxCGRT_", data_date, ".csv", sep = ""))
 url_gmobility <- "https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv"
 
 google.mobility <- read_csv(url(url_gmobility))
-glimpse(google.mobility)
-write.csv(google.mobility, file = paste("./rawgooglemobility_", data_date, ".csv", sep = ""))
-
 
 # Stata diff: Date already stored as date - no need to change
 
@@ -98,15 +96,7 @@ google.mobility <- google.mobility %>% rename(goog_retail = starts_with("retail"
 
 google.mobility <- google.mobility %>% filter(is.na(sub_region_1))
 
-dir.create(file.path(pwd, "working"))
-write.csv(google.mobility, file = paste("./working/googlemobility_", data_date, ".csv", sep = ""))
-
-#BUG 1 NOTES- no duplicates in google data
-
-
-
-
-
+write.csv(google.mobility, file = paste("../data/input/googlemobility_", data_date, ".csv", sep = ""))
 
 # Import Apple Mobility Data
 
@@ -134,24 +124,20 @@ apple.mobility <- apple.mobility %>% pivot_longer(-c(transportation_type, countr
        rename(apple_driving = driving, apple_walking = walking, apple_transit = transit) 
 #is there a more efficient way to do this without two pivots?
 
-write.csv(apple.mobility, file = paste("./working/applemobility_", data_date, ".csv", sep = ""))
-
-
-
-
-
+write.csv(apple.mobility, file = paste("../data/input/applemobility_", data_date, ".csv", sep = ""))
 
 #merge with apple and google mobility data
 
-google.mobility <- read.csv(file = paste("./working/googlemobility_", data_date, ".csv", sep = ""), stringsAsFactors = FALSE)
-oxcgrtdata <- read.csv(file = paste("OxCGRT_", data_date, ".csv", sep = ""), stringsAsFactors = FALSE)
-apple.mobility <- read.csv(file = paste("./working/applemobility_", data_date, ".csv", sep = ""), stringsAsFactors = F)
-#View(left_join(oxcgrtdata, google.mobility %>% select(starts_with("goog_"), country_region_code, date), by = c("CountryCode" = "country_region_code", "Date" = "date")))
+###############
+### Use these as back-ups for debugging/testing
+###############
 
+#google.mobility <- read.csv(file = paste("./data/input/googlemobility_", data_date, ".csv", sep = ""), stringsAsFactors = FALSE)
+#oxcgrtdata <- read.csv(file = paste("OxCGRT_", data_date, ".csv", sep = ""), stringsAsFactors = FALSE)
+#apple.mobility <- read.csv(file = paste("./data/input/applemobility_", data_date, ".csv", sep = ""), stringsAsFactors = F)
 
 oxcgrtdata <- left_join(oxcgrtdata, google.mobility %>% select(starts_with("goog_"), country_region_code, date), 
                by = c("CountryCode" = "country_region_code", "Date" = "date"))
-#BUG 1 fixed 
 
 oxcgrtdata <- left_join(oxcgrtdata, apple.mobility, by = c("CountryCode" = "countrycode", "Date" = "date"))
 
@@ -197,7 +183,7 @@ oxcgrtdata <- oxcgrtdata %>% ungroup() %>%
 
 oxcgrtdata <- oxcgrtdata %>% ungroup() %>% mutate(mobility_ave = rowMeans(oxcgrtdata[,c("apple_ave", "google_ave")]))
 
-write.csv(oxcgrtdata, file = paste("./OxCGRT_", data_date, ".csv", sep = ""))
+write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", sep = ""))
 
 
 #Bringing in OWID Testing Data
@@ -215,23 +201,21 @@ owid.data <- owid.data %>% rename(test_total = Cumulative.total,
                           subset(select = -c(Source.URL, Notes))
 
 owid.data <- owid.data %>% arrange(countrycode, Date, desc(test_total))
-owid.data <- owid.data[!duplicated(owid.data[,c("Date", "countrycode")]), ] %>% filter(countrycode == "GBR")
+owid.data <- owid.data[!duplicated(owid.data[,c("Date", "countrycode")]), ]
+owid.data <- owid.data %>% mutate(Date = as.Date(Date))
 
-write.csv(owid.data, file = paste("./working/testing_", data_date, ".csv", sep = ""))
+write.csv(owid.data, file = paste("../data/input/testing_", data_date, ".csv", sep = ""))
 
 oxcgrtdata <- left_join(oxcgrtdata, owid.data %>% select(countrycode, Date, test_total, test_totalperthou), 
           by = c("Date", "CountryCode"="countrycode"))
 
 oxcgrtdata <- oxcgrtdata %>% mutate(test_percase = test_total/ConfirmedCases)
 
-
-write.csv(oxcgrtdata, file = paste("./OxCGRT_", data_date, ".csv", sep = ""))  
-
-
+### new output file with testing data appended
+write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", sep = ""))  
 
 
-
-########### using testing data gaps
+########### using additional data to qualify gaps in testing data 
 testing_data2_url <- "https://drive.google.com/uc?id=13yev97Ua-E-EslhDIX9vQiC2OZIqgGX4&export=download"
 testing.data2 <- read.csv(url(testing_data2_url), stringsAsFactors = FALSE)
 
@@ -244,7 +228,7 @@ no.testing.data <- no.testing.data %>% mutate(countrycode = no.testing.data.ccod
 
 oxcgrtdata <- left_join(oxcgrtdata, no.testing.data %>% select(countrycode, test_nodata), by = c("CountryCode" = "countrycode"))
 
-write.csv(oxcgrtdata, file = paste("./OxCGRT_", data_date, ".csv", sep = ""))  
+write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", sep = ""))  
 
 
 
