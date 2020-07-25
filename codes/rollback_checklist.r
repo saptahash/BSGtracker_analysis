@@ -103,6 +103,7 @@ oxcgrtdata$alt_rollbackscore <- rowMeans(oxcgrtdata[c("test_and_trace", "cases_c
 oxcgrtdata$recoded_rollback <- ifelse(oxcgrtdata$outoflockdown == 1, 
                                       oxcgrtdata$alt_rollbackscore, oxcgrtdata$rollback_score)
 
+write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", sep = ""))
 
 
 
