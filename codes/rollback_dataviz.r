@@ -1,6 +1,3 @@
-install.packages(c("cowplot", "googleway", "ggplot2", "ggrepel", 
-                   "ggspatial", "libwgeom", "sf", "rnaturalearth", "rnaturalearthdata"))
-
 library("ggplot2")
 library("sf")
 library("rnaturalearth")
@@ -10,7 +7,7 @@ library(gganimate)
 library(plotly)
 library(ggpubr)
 
-
+source("rollbackviz_fun.r")
 # ## Visualise general spread of rollback scores - what does the distribution look like over time? 
 # 
 # ## Comments - Fix labels + collect all in one panel
@@ -55,19 +52,10 @@ ggplot(lineplot_rollback %>% filter(CountryCode %in% country_lineplot), aes(x = 
         axis.title.y.right = element_text(colour = "red")) +
   facet_wrap(~ CountryName)
 
-ggsave(paste("./graphs/lineplot_", zoo::as.Date(date), ".png", sep = ""),
+ggsave(paste("../graphs/lineplot_", zoo::as.Date(data_date), ".png", sep = ""),
        width = 18, 
        height = 7)
 
-
-
-#####################
-### formal code starts here, might delete the ones before this 
-#####################
-
-
-pwd <- "C:/Users/sapta/OneDrive/Desktop/oxcgrtRA/BSGtracker_analysis"
-setwd(pwd)
 
 plot_rollback <- oxcgrtdata %>% 
   select(CountryCode, region, ConfirmedCases, recoded_rollback,
@@ -101,7 +89,7 @@ for(d in dateseq_scatter){
 
 ## BUG fix - resize window properly - looks terrible on screen
 finalplot <- do.call(gridExtra::grid.arrange, P)
-ggsave(paste("./graphs/summary_scatterSIroll", zoo::as.Date(date), ".png", sep = ""), plot = finalplot,
+ggsave(paste("../graphs/summary_scatterSIroll", zoo::as.Date(date), ".png", sep = ""), plot = finalplot,
        width = 6, 
        height = 6)
 
@@ -109,7 +97,7 @@ ggsave(paste("./graphs/summary_scatterSIroll", zoo::as.Date(date), ".png", sep =
 ## decide whether to include legend - plot looks better without the legend 
 ## calibrate size to newcases instead of Confirmed Cases?
 scatter.SI.rollback.detail(date)
-ggsave(paste("./graphs/detail_scatterSIroll", zoo::as.Date(date), ".png", sep = ""), width = 8, 
+ggsave(paste("../graphs/detail_scatterSIroll", zoo::as.Date(date), ".png", sep = ""), width = 8, 
        height = 8)
 
 
@@ -156,7 +144,7 @@ ggsave(paste("./graphs/detail_scatterSIroll", zoo::as.Date(date), ".png", sep = 
 
 for(r in region_list){
   p <- tilemap.regionwise(r)
-  ggsave(paste("./graphs/tilemap", zoo::as.Date(date),"_", r, ".png", sep = ""), width = 20, 
+  ggsave(paste("../graphs/tilemap", zoo::as.Date(date),"_", r, ".png", sep = ""), width = 20, 
          height = 10, plot = p)
 }
 
@@ -185,7 +173,7 @@ chloro.daily <- ggplot(current.rollback.df, aes(x = index_name, y = forcats::fct
                               "Rollback Score", "Rollback Score/new"), position = "top") +
   theme_classic()
 
-ggsave(paste("./graphs/dailychloropleth_", zoo::as.Date(date), ".png", sep = ""), width = 10, 
+ggsave(paste("../graphs/dailychloropleth_", zoo::as.Date(date), ".png", sep = ""), width = 10, 
        height = 25, plot = chloro.daily)
 
 
@@ -213,7 +201,7 @@ chloro.sum <- ggpubr::annotate_figure(chloro.sum,
                                       top = text_grob("Map of rollback readiness of countries over time", size = 14)) 
 
 
-ggsave(paste("./graphs/chloropleth_", zoo::as.Date(date), ".png", sep = ""), width = 15, 
+ggsave(paste("../graphs/chloropleth_", zoo::as.Date(date), ".png", sep = ""), width = 15, 
        height = 7.5, plot = chloro.sum)
 
 
