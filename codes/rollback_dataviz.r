@@ -96,7 +96,7 @@ ggsave(paste("../graphs/summary_scatterSIroll_latest", ".png", sep = ""), plot =
 ### detailed plot 
 ## decide whether to include legend - plot looks better without the legend 
 ## calibrate size to newcases instead of Confirmed Cases?
-scatter.SI.rollback.detail(date)
+scatter.SI.rollback.detail(as.Date(date))
 ggsave(paste("../graphs/detail_scatterSIroll_latest", ".png", sep = ""), width = 8, 
        height = 8)
 
