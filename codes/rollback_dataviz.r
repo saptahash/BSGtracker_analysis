@@ -59,7 +59,7 @@ ggsave(paste("../graphs/lineplot_latest", ".png", sep = ""),
 
 plot_rollback <- oxcgrtdata %>% 
   select(CountryCode, region, ConfirmedCases, openness_risk, Date) %>% 
-  mutate(recoded_rollback = ifelse(openness_risk < 0, 0, openness_risk), 
+  mutate(openness_risk = ifelse(openness_risk < 0, 0, openness_risk), 
          Date = lubridate::ymd(Date)) %>%
   filter(Date > "2020-04-01")
 
