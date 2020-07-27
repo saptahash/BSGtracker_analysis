@@ -34,17 +34,17 @@ source("rollbackviz_fun.r")
 # }
 
 lineplot_rollback <- oxcgrtdata %>% 
-  select(CountryCode, region, rollback_score, recoded_rollback, StringencyIndex, CountryName, Date) %>% 
-  mutate(recoded_rollback = ifelse(recoded_rollback > 1, 1, recoded_rollback), 
-         Date = lubridate::ymd(Date))
+  select(CountryCode, region, openness_risk, StringencyIndex, CountryName, Date) %>% 
+  mutate(openness_risk = ifelse(openness_risk < 0, 0, openness_risk),
+    Date = lubridate::ymd(Date))
 
 country_lineplot <- c("CHN", "KOR", "FRA", "ITA", "GBR", "USA")
 
 ggplot(lineplot_rollback %>% filter(CountryCode %in% country_lineplot), aes(x = Date, group = 1)) + 
-  geom_line(aes(y = recoded_rollback)) + 
+  geom_line(aes(y = openness_risk)) + 
   geom_line(aes(y = StringencyIndex/100), colour = "red") + 
   scale_y_continuous(
-    name = "Rollback Score", 
+    name = "Openness Risk", 
     sec.axis = sec_axis(~.*100, name = "Stringency Index")) + 
   scale_x_date(breaks = seq.Date(lubridate::ymd(min(lineplot_rollback$Date)), lubridate::ymd(max(lineplot_rollback$Date)),21)) + 
   theme(axis.text.x = element_text(size = 6.5, angle = 0), 
@@ -58,9 +58,8 @@ ggsave(paste("../graphs/lineplot_latest", ".png", sep = ""),
 
 
 plot_rollback <- oxcgrtdata %>% 
-  select(CountryCode, region, ConfirmedCases, recoded_rollback,
-         rollback_score, Date) %>% 
-  mutate(recoded_rollback = ifelse(recoded_rollback > 1, 1, recoded_rollback), 
+  select(CountryCode, region, ConfirmedCases, openness_risk, Date) %>% 
+  mutate(recoded_rollback = ifelse(openness_risk < 0, 0, openness_risk), 
          Date = lubridate::ymd(Date)) %>%
   filter(Date > "2020-04-01")
 
