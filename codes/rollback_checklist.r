@@ -106,6 +106,17 @@ oxcgrtdata$recoded_rollback <- ifelse(oxcgrtdata$outoflockdown == 1,
 write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", sep = ""))
 
 
+#####################
+## New openness risk calculations 
+#' 1. Change in manage_imported_cases indicator
+#' 2. Change in cases_controlled
+#####################
+
+# Updating definition of manage_imported_cases
+oxcgrtdata <- oxcgrtdata %>% mutate(manage_imported_cases = case_when(C8_International_1 == 0 ~ 0, 
+                                                        C8_International_1 == 1 ~ 0.25, 
+                                                        C8_International_1 == 2 ~ 0.5, 
+                                                        C8_International_1 > 2 ~ 1))
 
 
 
