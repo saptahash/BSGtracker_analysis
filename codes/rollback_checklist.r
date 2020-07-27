@@ -110,6 +110,7 @@ write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", 
 ## New openness risk calculations 
 #' 1. Change in manage_imported_cases indicator
 #' 2. Change in cases_controlled
+#' 3. Invert score since this is openness risk, not rollback readiness
 #####################
 
 # Updating definition of manage_imported_cases
@@ -123,7 +124,11 @@ oxcgrtdata <- oxcgrtdata %>%
   mutate(cases_per100k = newcases/(popWB/100000), 
          cases_controlled_per100k = case_when(cases_per100k >= 25 ~ 0, 
                                               cases_per100k < 25 ~ ((25-cases_per100k)/25)))
-  
+
+# Calculating new rollback readiness score
+
+oxcgrtdata$recoded_rollback <- rowMeans(oxcgrtdata[c("community_understanding", "test_and_trace",
+                                                   "manage_imported_cases", "cases_controlled_per100k")], na.rm = T)
 
 
 
