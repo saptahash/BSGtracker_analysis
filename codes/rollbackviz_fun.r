@@ -20,15 +20,15 @@ twoaxis.line <- function(data, countrylist){
 
 scatter.SI.rollback <- function(date){
   scatter.plot.subtitle <- paste("Date: ", date, sep = "")
-  ggplot(oxcgrtdata %>% filter(Date == date) %>% filter(!is.na(outoflockdown)), aes(x = recoded_rollback, y = StringencyIndex, color = factor(outoflockdown), label = CountryCode)) + 
-    geom_point(aes(size = ConfirmedCases)) + 
+  ggplot(oxcgrtdata %>% filter(Date == date) %>% filter(!is.na(outoflockdown)), aes(x = openness_risk, y = StringencyIndex, color = factor(outoflockdown), label = CountryCode)) + 
+    geom_point(aes(size = newcases)) + 
     lims(colour = c("0", "1")) + 
     #      geom_text_repel(data = subset(oxcgrtdata %>% filter(Date == "2020-06-27"), outoflockdown == 1), 
     #                size = 3) + 
     #    annotate(geom = "text", x = 0.01, y = 37, label = "Countries below this range are scaling back lockdown", 
     #             size = 1.5, hjust = "left") +
     geom_hline(yintercept = 35, size = 0.3, linetype = 2) + 
-    labs(x = "Rollback Readiness", 
+    labs(x = "Openness Risk", 
          y = "Stringency Index", 
          #       title = "Mapping Stringency Index and Rollback readiness", 
          subtitle = scatter.plot.subtitle) + 
