@@ -197,7 +197,7 @@ for(date in dateseq_scatter){
 chloro.sum <- ggpubr::ggarrange(plotlist = P, common.legend = T, legend = "right", vjust = 1)
 
 chloro.sum <- ggpubr::annotate_figure(chloro.sum,
-                                      top = text_grob("Map of rollback readiness of countries over time", size = 14)) 
+                                      top = text_grob("Map of Openness Risk of countries over time", size = 14)) 
 
 
 ggsave(paste("../graphs/chloropleth_latest", ".png", sep = ""), width = 15, 

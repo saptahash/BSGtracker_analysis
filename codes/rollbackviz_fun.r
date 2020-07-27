@@ -39,7 +39,7 @@ scatter.SI.rollback <- function(date){
 
 scatter.SI.rollback.detail <- function(date){
   scatter.plot.subtitle <- paste("Date: ", date, sep = "")
-  ggplot(oxcgrtdata %>% filter(Date == date) %>% filter(!is.na(outoflockdown)), aes(x = recoded_rollback, y = StringencyIndex, color = factor(outoflockdown), label = CountryCode)) + 
+  ggplot(oxcgrtdata %>% filter(Date == date) %>% filter(!is.na(outoflockdown)), aes(x = openness_risk, y = StringencyIndex, color = factor(outoflockdown), label = CountryCode)) + 
     geom_point(aes(size = newcases)) + 
     lims(colour = c("0", "1")) + 
     geom_text_repel(data = subset(oxcgrtdata %>% filter(Date == date), outoflockdown == 1), 
@@ -47,9 +47,9 @@ scatter.SI.rollback.detail <- function(date){
     annotate(geom = "text", x = 0.01, y = 37, label = "Countries below this range are scaling back lockdown", 
              size = 2.5, hjust = "left") +
     geom_hline(yintercept = 35, size = 0.3, linetype = 2) + 
-    labs(x = "Rollback Readiness", 
+    labs(x = "Openness Risk", 
          y = "Stringency Index", 
-         title = "Mapping Stringency Index and Rollback readiness", 
+         title = "Mapping Stringency Index and Openness Risk", 
          subtitle = scatter.plot.subtitle) + 
     guides(size = F) + 
     scale_colour_discrete(name = "", breaks = c(1), labels = c("Scaling back lockdown")) +
@@ -83,9 +83,9 @@ tilemap.regionwise <- function(region_name){
 chloropleth.map.summary <- function(date){
   map.subtitle = paste("Date: ", date, sep = "")
   ggplot(map_df %>% filter(Date == lubridate::ymd(date))) +
-    geom_sf(aes(fill = recoded_rollback)) + 
+    geom_sf(aes(fill = openness_risk)) + 
     labs(subtitle = map.subtitle) + 
-    scale_fill_viridis_c(option = "viridis", name = "Rollback Readiness Index", na.value = "gray") + 
+    scale_fill_viridis_c(option = "viridis", name = "Openness Risk", na.value = "gray") + 
     ggthemes::theme_map()
 }
 
