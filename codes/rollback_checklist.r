@@ -118,7 +118,12 @@ oxcgrtdata <- oxcgrtdata %>% mutate(manage_imported_cases = case_when(C8_Interna
                                                         C8_International_1 == 2 ~ 0.5, 
                                                         C8_International_1 > 2 ~ 1))
 
-
+# Updating definition of cases_controlled - adding new cases_controlled_100k to record this
+oxcgrtdata <- oxcgrtdata %>%
+  mutate(cases_per100k = newcases/(popWB/100000), 
+         cases_controlled_per100k = case_when(cases_per100k >= 25 ~ 0, 
+                                              cases_per100k < 25 ~ ((25-cases_per100k)/25)))
+  
 
 
 
