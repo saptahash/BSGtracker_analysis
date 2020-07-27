@@ -148,16 +148,16 @@ for(r in region_list){
 }
 
 current.rollback.df <- oxcgrtdata %>% filter(Date == as.Date(date)) %>% 
-  select(CountryCode, rollback_score, recoded_rollback, community_understanding, 
-         test_and_trace, manage_imported_cases, cases_controlled, region)
+  select(CountryCode, openness_risk, community_understanding, 
+         test_and_trace, manage_imported_cases, cases_controlled, region) %>%
+  mutate(openness_risk = ifelse(openness_risk < 0, 0, openness_risk))
 
 current.rollback.df <- current.rollback.df %>% 
   pivot_longer(-c(CountryCode, region), names_to = "index_name", values_to = "index_value") %>% 
   mutate(index_name = case_when(index_name == "cases_controlled" ~ "Cases Controlled", 
                                 index_name == "community_understanding" ~ "Community Understanding", 
                                 index_name == "manage_imported_cases" ~ "Imported Cases", 
-                                index_name == "recoded_rollback" ~ "Rollback Score/new", 
-                                index_name == "rollback_score" ~ "Rollback Score", 
+                                index_name == "openness_risk" ~ "Openness Risk", 
                                 index_name == "test_and_trace" ~ "Test and Trace"))
 
 chloro.daily <- ggplot(current.rollback.df, aes(x = index_name, y = forcats::fct_rev(CountryCode), fill = index_value)) +
@@ -169,7 +169,7 @@ chloro.daily <- ggplot(current.rollback.df, aes(x = index_name, y = forcats::fct
        x = "") +
   scale_x_discrete(limits = c("Cases Controlled", "Community Understanding", 
                               "Imported Cases", "Test and Trace", 
-                              "Rollback Score", "Rollback Score/new"), position = "top") +
+                              "Openness Risk"), position = "top") +
   theme_classic()
 
 ggsave(paste("../graphs/dailychloropleth_latest", ".png", sep = ""), width = 10, 
