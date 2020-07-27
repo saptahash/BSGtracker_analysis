@@ -130,7 +130,8 @@ oxcgrtdata <- oxcgrtdata %>%
 oxcgrtdata$recoded_rollback <- rowMeans(oxcgrtdata[c("community_understanding", "test_and_trace",
                                                    "manage_imported_cases", "cases_controlled_per100k")], na.rm = T)
 
-
+# Invert score to reflect openess risk 
+oxcgrtdata <- oxcgrtdata %>% mutate(openness_risk = 1 - recoded_rollback)
 
 
 
