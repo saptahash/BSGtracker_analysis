@@ -47,7 +47,7 @@ scatter.SI.rollback.detail <- function(date){
 #    annotate(geom = "text", x = 0.01, y = 37, label = "Countries below this range are scaling back lockdown", 
 #             size = 2.5, hjust = "left") +
     geom_hline(yintercept = 50, size = 0.3, linetype = 2) + 
-    geom_vline(xintercept = 0.4, size = 0.3, linetype = 2) +
+    geom_vline(xintercept = 0.5, size = 0.3, linetype = 2) +
     labs(x = "Openness Risk", 
          y = "Stringency Index", 
          title = "Mapping Stringency Index and Openness Risk", 
@@ -66,7 +66,7 @@ tilemap.regionwise <- function(region_name){
            filter(region == region_name) , 
          aes(y = forcats::fct_rev(CountryCode), x = Date, fill = openness_risk)) + 
     geom_tile(width = 0.9, height = 0.9) +
-    scale_fill_viridis_c(name = "Openness Risk", na.value = "gray") +
+    scale_fill_viridis_c(name = "Openness Risk", na.value = "gray", begin = 0, end = 1) +
     scale_x_date(breaks = seq.Date(lubridate::ymd(min(plot_rollback$Date)),
                                    lubridate::ymd(max(plot_rollback$Date) - 7), 7), 
                  limits = c(lubridate::ymd("2020-04-01"), max(plot_rollback$Date) - 7), 
