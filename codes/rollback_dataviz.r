@@ -210,7 +210,7 @@ current.rollback.df <- current.rollback.df %>%
 
 chloro.daily <- ggplot(current.rollback.df, aes(x = index_name, y = forcats::fct_rev(CountryCode), fill = index_value)) +
   geom_tile(width = 0.95, height = 0.9) + 
-  scale_fill_viridis_c(name = "Scale (0-1)",na.value = "gray") +
+  scale_fill_viridis_c(name = "Scale (0-1)",na.value = "gray", direction = -1, breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
   theme(axis.text.y = element_text(size = 10), 
         axis.text.x = element_text(size = 8)) + 
   labs(y = "Country Code (ISO-3)", 
@@ -220,7 +220,7 @@ chloro.daily <- ggplot(current.rollback.df, aes(x = index_name, y = forcats::fct
                               "Openness Risk"), position = "top") +
   theme_classic()
 
-ggsave(paste("../graphs/dailytilemap_latest", ".png", sep = ""), width = 10, 
+ggsave(paste("../graphs/new-score/dailytilemap_latest", ".png", sep = ""), width = 10, 
        height = 25, plot = chloro.daily)
 
 
@@ -248,7 +248,7 @@ chloro.sum <- ggpubr::annotate_figure(chloro.sum,
                                       top = text_grob("Map of Openness Risk of countries over time", size = 14)) 
 
 
-ggsave(paste("../graphs/chloropleth_latest", ".png", sep = ""), width = 15, 
+ggsave(paste("../graphs/new-score/chloropleth_latest", ".png", sep = ""), width = 15, 
        height = 7.5, plot = chloro.sum)
 
 ####-------------------Diagnostics-----------------------
