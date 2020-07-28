@@ -139,8 +139,8 @@ for(d in dateseq_scatter){
 ## BUG fix - resize window properly - looks terrible on screen
 finalplot <- do.call(gridExtra::grid.arrange, P)
 ggsave(paste("../graphs/new-score/summary_scatterSIroll_latest", ".png", sep = ""), plot = finalplot,
-       width = 6, 
-       height = 6)
+       width = 10, 
+       height = 8)
 
 # -----------------------  HEADLINE SCATTER PLOTS ------------------------#
 
