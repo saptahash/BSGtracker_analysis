@@ -89,7 +89,8 @@ chloropleth.map.summary <- function(date){
   ggplot(map_df %>% filter(Date == lubridate::ymd(date))) +
     geom_sf(aes(fill = openness_risk)) + 
     labs(subtitle = map.subtitle) + 
-    scale_fill_viridis_c(option = "viridis", name = "Openness Risk", na.value = "gray") + 
+    scale_fill_viridis_c(option = "viridis", name = "Openness Risk", na.value = "gray", direction = -1, 
+                         breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1.0)) + 
     ggthemes::theme_map()
 }
 
