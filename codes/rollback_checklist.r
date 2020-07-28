@@ -133,6 +133,8 @@ oxcgrtdata$recoded_rollback <- rowMeans(oxcgrtdata[c("community_understanding", 
 # Invert score to reflect openess risk 
 oxcgrtdata <- oxcgrtdata %>% mutate(openness_risk = 1 - recoded_rollback)
 
+write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", sep = ""))
+
 
 
 
