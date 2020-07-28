@@ -151,7 +151,7 @@ ggsave(paste("../graphs/new-score/summary_scatterSIroll_latest", ".png", sep = "
 
 #--- .GIF of scatter plot over time---
 
-scatterplot_frame <- ggplot(plot_rollback %>% filter(!is.na(lightup_state)) %>% arrange(Date),
+scatterplot_frame <- ggplot(plot_rollback %>% filter(Date < date) %>% arrange(Date),
                             aes(x = openness_risk, y = StringencyIndex, colour = factor(lightup_state), label = CountryCode)) + 
   geom_point(aes(size = newcases)) +
   lims(colour = c("0", "1")) +
