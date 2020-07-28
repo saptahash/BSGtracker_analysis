@@ -38,22 +38,27 @@ scatter.SI.rollback <- function(date){
 }
 
 scatter.SI.rollback.detail <- function(date){
+  theme_set(theme_gray())
   scatter.plot.subtitle <- paste("Date: ", date, sep = "")
-  ggplot(oxcgrtdata %>% filter(Date == date) %>% filter(!is.na(outoflockdown)), aes(x = openness_risk, y = StringencyIndex, color = factor(outoflockdown), label = CountryCode)) + 
+  ggplot(plot_rollback %>% filter(Date == date), aes(x = openness_risk, color = factor(lightup_state), y = StringencyIndex,label = CountryCode)) +  #color = factor(outoflockdown), 
     geom_point(aes(size = newcases)) + 
     lims(colour = c("0", "1")) + 
-    geom_text_repel(data = subset(oxcgrtdata %>% filter(Date == date), outoflockdown == 1), 
-                    size = 3) + 
-    annotate(geom = "text", x = 0.01, y = 37, label = "Countries below this range are scaling back lockdown", 
-             size = 2.5, hjust = "left") +
-    geom_hline(yintercept = 35, size = 0.3, linetype = 2) + 
+    geom_text_repel(data = subset(plot_rollback %>% filter(Date == date), lightup_state == 1 | key_country == 1 | ((openness_risk > 0.4) & (StringencyIndex < 50))), 
+                    size = 3, colour = "black") + 
+#    annotate(geom = "text", x = 0.01, y = 37, label = "Countries below this range are scaling back lockdown", 
+#             size = 2.5, hjust = "left") +
+    geom_hline(yintercept = 50, size = 0.3, linetype = 2) + 
+    geom_vline(xintercept = 0.4, size = 0.3, linetype = 2) +
     labs(x = "Openness Risk", 
          y = "Stringency Index", 
          title = "Mapping Stringency Index and Openness Risk", 
          subtitle = scatter.plot.subtitle) + 
     guides(size = F) + 
-    scale_colour_discrete(name = "", breaks = c(1), labels = c("Scaling back lockdown")) +
-    scale_y_continuous(breaks = c(25, 35, 50, 75, 100)) 
+#    viridis::scale_colour_viridis(discrete = T) +
+    scale_y_continuous(breaks = c(25, 35, 50, 75, 100)) + 
+    scale_x_continuous(breaks = c(seq(from = 0, to = 1, by = 0.2))) +
+    scale_colour_discrete(name = "", breaks = c(1), labels = c("Dropped stringency levels in past week")) +
+    scale_size(range = c(3,9))
 }
 
 

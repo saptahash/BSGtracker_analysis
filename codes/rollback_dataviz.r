@@ -102,12 +102,8 @@ ggsave(paste("../graphs/summary_scatterSIroll_latest", ".png", sep = ""), plot =
        width = 6, 
        height = 6)
 
-### detailed SCATTER plot 
-## decide whether to include legend - plot looks better without the legend 
-## calibrate size to newcases instead of Confirmed Cases?
-scatter.SI.rollback.detail(as.Date(date))
-ggsave(paste("../graphs/detail_scatterSIroll_latest", ".png", sep = ""), width = 10, 
-       height = 8)
+# -----------------------  HEADLINE SCATTER PLOTS ------------------------#
+
 #' CODE NOTES:
 #' 1. Need to add two versions, one TR and one BL. TR looks bad - figure out
 #' 2. Change region color palette
@@ -115,12 +111,11 @@ ggsave(paste("../graphs/detail_scatterSIroll_latest", ".png", sep = ""), width =
 
 #--- .GIF of scatter plot over time---
 
-
 scatterplot_frame <- ggplot(plot_rollback %>% filter(!is.na(lightup_state)) %>% arrange(Date),
                             aes(x = openness_risk, y = StringencyIndex, colour = factor(lightup_state), label = CountryCode)) + 
   geom_point(aes(size = newcases)) +
   lims(colour = c("0", "1")) +
-  geom_text_repel(data = subset(plot_rollback, key_country == 1 | lightup_state == 1 | (StringencyIndex < 35 & openness_risk > 0.5)), 
+  geom_text_repel(data = subset(plot_rollback, key_country == 1 | lightup_state == 1 | (StringencyIndex < 35 & openness_risk > 0.4)), 
                 size = 3, colour  = "black") + 
   #    annotate(geom = "text", x = 0.01, y = 37, label = "Countries below this range are scaling back lockdown", 
   #             size = 1.5, hjust = "left") +
@@ -142,15 +137,17 @@ scatterplot_frame <- ggplot(plot_rollback %>% filter(!is.na(lightup_state)) %>% 
 rollback_anim <- animate(scatterplot_frame, fps = 2, width = 1000, height = 800, renderer = gifski_renderer(loop = F))
 save_animation(rollback_anim, file = "../bin/scatterplot_fps2.gif")
 
-scatterplot_frame <- ggplot(plot_rollback %>% arrange(Date)) +
-  geom_sf(aes(fill = rollback_score)) +
-  theme_light() +
-  labs(title = "Country rollback-scores",
-       subtitle = "Date: {current_frame}") +
-  scale_fill_viridis_c(name = "Rollback Scores") +
-  transition_manual(Date) +
-  ease_aes()
-# 
+#--- .GIF of scatter plot over time---
+
+#-----------.GIF of current scatter plot contrasting countries either quadrant 
+
+## decide whether to include legend - plot looks better without the legend 
+## calibrate size to newcases instead of Confirmed Cases?
+scatter.SI.rollback.detail(as.Date(date))
+ggsave(paste("../graphs/detail_scatterSIroll_latest", ".png", sep = ""), width = 10, 
+       height = 8)
+
+#-----------.GIF of current scatter plot contrasting countries either quadrant 
 
 
 
