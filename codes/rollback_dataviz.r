@@ -59,15 +59,20 @@ ggsave(paste("../graphs/lineplot_latest", ".png", sep = ""),
 
 
 plot_rollback <- oxcgrtdata %>% 
-  select(CountryCode, region, ConfirmedCases, openness_risk, rollback_score, Date) %>% 
+  select(CountryCode, region, ConfirmedCases, StringencyIndex, outoflockdown, newcases, openness_risk, rollback_score, Date) %>% 
   mutate(openness_risk = ifelse(openness_risk < 0, 0, openness_risk), 
-         Date = lubridate::ymd(Date)) %>%
+         Date = lubridate::ymd(Date), 
+         key_country = ifelse(CountryCode %in% country_lineplot, 1, 0)) %>%
   filter(Date > "2020-04-01")
 
+plot_rollback <- plot_rollback %>% group_by(CountryCode) %>% arrange(CountryCode, Date) %>%
+  mutate(lag_SI = lag(StringencyIndex, n = 1L),
+    lightup_state = ifelse(StringencyIndex < 35 & lag_SI >= 35, 1, 0)) %>%
+  select(-c("lag_SI"))
 
 theme_set(theme_gray())
 
-## trying out alternate figure of scatter plot instead
+######-----------------SCATTER PLOTS--------------------------------------
 
 ## publish two plots - 
 ## 1. Detailed and annotated chart of the latest data 
@@ -104,6 +109,56 @@ ggsave(paste("../graphs/detail_scatterSIroll_latest", ".png", sep = ""), width =
 #' 2. Change region color palette
 #' 3. v2 with countries that have recently entered stringency bar 
 
+#--- .GIF of scatter plot over time---
+
+
+scatterplot_frame <- ggplot(plot_rollback %>% arrange(Date),
+                            aes(x = openness_risk, y = StringencyIndex, label = CountryCode)) + 
+  geom_point(aes(size = newcases)) + 
+  geom_text_repel(data = subset(plot_rollback, StringencyIndex < 35 & openness_risk > 0.4), 
+                size = 3, colour  = "black") + 
+  #    annotate(geom = "text", x = 0.01, y = 37, label = "Countries below this range are scaling back lockdown", 
+  #             size = 1.5, hjust = "left") +
+  geom_hline(yintercept = 35, size = 0.3, linetype = 2) + 
+  geom_vline(xintercept = 0.4, size = 0.3, linetype = 2) +
+  labs(x = "Openness Risk", 
+       y = "Stringency Index", 
+       title = "Mapping Stringency Index and Rollback readiness", 
+       subtitle = "Date: {current_frame}") + 
+  guides(size = F, colour = F) + 
+  #    scale_colour_discrete(name = "", breaks = c(1), labels = c("Scaling back lockdown")) +
+  scale_y_continuous(breaks = c(25, 35, 50, 75, 100)) + 
+  facet_wrap(~ region) +
+#  viridis::scale_color_viridis(discrete = T) +
+  transition_manual(Date) + 
+  ease_aes()
+
+rollback_anim <- animate(scatterplot_frame, fps = 5, width = 1000, height = 500, renderer = gifski_renderer(loop = F))
+save_animation(rollback_anim, file = "../bin/scatterplot_fps5.gif")
+
+scatterplot_frame <- ggplot(plot_rollback %>% arrange(Date)) +
+  geom_sf(aes(fill = rollback_score)) +
+  theme_light() +
+  labs(title = "Country rollback-scores",
+       subtitle = "Date: {current_frame}") +
+  scale_fill_viridis_c(name = "Rollback Scores") +
+  transition_manual(Date) +
+  ease_aes()
+# 
+
+
+
+
+
+
+
+# rollback_anim <- animate(rollback_plot, fps = 5, width = 1000, height = 500, renderer = gifski_renderer(loop = F))
+# save_animation(rollback_anim, file = "rollback_animation_fps5.gif")
+# 
+
+
+
+######-----------------SCATTER PLOTS--------------------------------------
 
 for(r in region_list){
   p <- tilemap.regionwise(r)
