@@ -6,6 +6,8 @@
 
 ![Detailed scatter latest](./graphs/new-score/summary_scatterSIroll_latest.png)
 
+![Detailed scatter latest](./bin/scatterplot_fps2.gif)
+
 ## Line plots of Stringency Index and Openness Risk
 
 ![Lineplots of key countries](./graphs/new-score/lineplot_latest.png)
