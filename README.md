@@ -35,6 +35,8 @@
 
 ![Lineplots of key countries](./graphs/lineplot_latest.png)
 
+![Lineplots .gif](./temp/lineplot_fps2.gif)
+
 ## Heatmaps of rollback scores of countries over time 
 #### East Asia and Pacific 
 ![Tile map East Asia Pacific](./graphs/tilemap_latest_East_Asia_Pacific.png)
