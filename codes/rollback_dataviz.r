@@ -57,6 +57,28 @@ ggsave(paste("../graphs/lineplot_latest", ".png", sep = ""),
        width = 18, 
        height = 7)
 
+###---------Lineplots GIFs--------------
+lineplot_gif <- ggplot(lineplot_rollback %>% filter(CountryCode %in% country_lineplot), aes(x = Date, group = 1)) + 
+  geom_line(aes(y = openness_risk)) + 
+  geom_point(aes(y = openness_risk)) +
+  geom_line(aes(y = StringencyIndex/100), colour = "red") + 
+  geom_point(aes(y = StringencyIndex/100), colour = "red") + 
+  scale_y_continuous(
+    name = "Openness Risk", 
+    sec.axis = sec_axis(~.*100, name = "Stringency Index")) + 
+  scale_x_date(breaks = seq.Date(lubridate::ymd(min(lineplot_rollback$Date)), lubridate::ymd(max(lineplot_rollback$Date)),21)) + 
+  theme(axis.text.x = element_text(size = 6.5, angle = 20), 
+        axis.text.y.right = element_text(colour = "red"), 
+        axis.title.y.right = element_text(colour = "red")) +
+  facet_wrap(~ CountryName) + 
+  transition_reveal(Date, keep_last = T)
+
+lineplot_anim <- animate(lineplot_gif, fps = 14, width = 1000, height = 800, renderer = gifski_renderer(loop = F))
+save_animation(lineplot_anim, file = "../temp/lineplot_fps2.gif")
+# adjust width
+
+###----------------------------
+
 
 plot_rollback <- oxcgrtdata %>% 
   select(CountryCode, region, ConfirmedCases, StringencyIndex, outoflockdown, newcases, openness_risk, rollback_score, Date) %>% 
