@@ -113,9 +113,9 @@ ggsave(paste("../graphs/detail_scatterSIroll_latest", ".png", sep = ""), width =
 
 
 scatterplot_frame <- ggplot(plot_rollback %>% arrange(Date),
-                            aes(x = openness_risk, y = StringencyIndex, label = CountryCode)) + 
+                            aes(x = openness_risk, y = StringencyIndex, colour = lightup_state, label = CountryCode)) + 
   geom_point(aes(size = newcases)) + 
-  geom_text_repel(data = subset(plot_rollback, StringencyIndex < 35 & openness_risk > 0.4), 
+  geom_text_repel(data = subset(plot_rollback, key_country == 1 | lightup_state == 1), 
                 size = 3, colour  = "black") + 
   #    annotate(geom = "text", x = 0.01, y = 37, label = "Countries below this range are scaling back lockdown", 
   #             size = 1.5, hjust = "left") +
@@ -128,7 +128,7 @@ scatterplot_frame <- ggplot(plot_rollback %>% arrange(Date),
   guides(size = F, colour = F) + 
   #    scale_colour_discrete(name = "", breaks = c(1), labels = c("Scaling back lockdown")) +
   scale_y_continuous(breaks = c(25, 35, 50, 75, 100)) + 
-  facet_wrap(~ region) +
+#  facet_wrap(~ region) +
 #  viridis::scale_color_viridis(discrete = T) +
   transition_manual(Date) + 
   ease_aes()
