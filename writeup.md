@@ -4,7 +4,7 @@
 
 <!---[Scatter SI vs Rollback](/graphs/summary_scatterSIroll2020-06-28.png)--->
 
-![Detailed scatter latest](./graphs/new-score/summary_scatterSIroll_latest.png.png)
+![Detailed scatter latest](./graphs/new-score/summary_scatterSIroll_latest.png)
 
 ## Line plots of Stringency Index and Openness Risk
 
