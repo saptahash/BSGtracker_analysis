@@ -31,7 +31,7 @@
 
 <!---[Scatter SI vs Rollback](/graphs/summary_scatterSIroll2020-06-28.png)--->
 
-<img src="/graphs/summary_scatterSIroll_latest.png" width="700" height = "700">
+<img src="/graphs/gifs/scatterplot_fps2.gif" width="700" height = "700">
 
 ### Heatmaps of rollback scores of countries over time 
 #### East Asia and Pacific 
