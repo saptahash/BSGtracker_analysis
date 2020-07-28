@@ -64,9 +64,9 @@ scatter.SI.rollback.detail <- function(date){
 tilemap.regionwise <- function(region_name){
   ggplot(plot_rollback %>% arrange(CountryCode, Date) %>% ungroup() %>%
            filter(region == region_name) , 
-         aes(y = forcats::fct_rev(CountryCode), x = Date, fill = openness_risk)) + 
+         aes(y = forcats::fct_rev(CountryCode), x = Date, fill = scales::rescale(openness_risk, to = c(0,1)))) + 
     geom_tile(width = 0.9, height = 0.9) +
-    scale_fill_viridis_c(name = "Openness Risk", na.value = "gray", begin = 0, end = 1) +
+    scale_fill_viridis_c(name = "Openness Risk", na.value = "gray", begin = 0, end = 1, direction = -1,breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1) ) +
     scale_x_date(breaks = seq.Date(lubridate::ymd(min(plot_rollback$Date)),
                                    lubridate::ymd(max(plot_rollback$Date) - 7), 7), 
                  limits = c(lubridate::ymd("2020-04-01"), max(plot_rollback$Date) - 7), 

@@ -177,35 +177,21 @@ scatterplot_frame <- ggplot(plot_rollback %>% filter(Date < date) %>% arrange(Da
 rollback_anim <- animate(scatterplot_frame, fps = 2, width = 1000, height = 800, renderer = gifski_renderer(loop = F))
 save_animation(rollback_anim, file = "../graphs/gifs/scatterplot_fps2.gif")
 
-#--- .GIF of scatter plot over time---
-
-#-----------.GIF of current scatter plot contrasting countries either quadrant 
+#-----------.detailed scatter plot
 
 ## decide whether to include legend - plot looks better without the legend 
 ## calibrate size to newcases instead of Confirmed Cases?
 scatter.SI.rollback.detail(as.Date(date))
-ggsave(paste("../graphs/detail_scatterSIroll_latest", ".png", sep = ""), width = 10, 
+ggsave(paste("../graphs/new-score/detail_scatterSIroll_latest", ".png", sep = ""), width = 10, 
        height = 8)
 
-#-----------.GIF of current scatter plot contrasting countries either quadrant 
 
 
-
-
-
-
-
-# rollback_anim <- animate(rollback_plot, fps = 5, width = 1000, height = 500, renderer = gifski_renderer(loop = F))
-# save_animation(rollback_anim, file = "rollback_animation_fps5.gif")
-# 
-
-
-
-######-----------------SCATTER PLOTS--------------------------------------
+######-----------------TILE MAPS--------------------------------------
 
 for(r in region_list){
   p <- tilemap.regionwise(r)
-  ggsave(paste("../graphs/tilemap_latest_", r, ".png", sep = ""), width = 20, 
+  ggsave(paste("../graphs/new-score/tilemap_latest_", r, ".png", sep = ""), width = 20, 
          height = 10, plot = p)
 }
 
