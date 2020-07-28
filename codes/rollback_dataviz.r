@@ -53,7 +53,7 @@ ggplot(lineplot_rollback %>% filter(CountryCode %in% country_lineplot), aes(x = 
         axis.title.y.right = element_text(colour = "red")) +
   facet_wrap(~ CountryName)
 
-ggsave(paste("../graphs/lineplot_latest", ".png", sep = ""),
+ggsave(paste("../graphs/new-score/lineplot_latest", ".png", sep = ""),
        width = 18, 
        height = 7)
 
@@ -79,7 +79,18 @@ save_animation(lineplot_anim, file = "../temp/lineplot_fps2.gif")
 
 ###----------------------------
 
+######-----------------SCATTER PLOTS--------------------------------------
 
+## publish two plots - 
+## 1. Detailed and annotated chart of the latest data 
+## 2. Multiple grid plots of historical data - minimal detail
+
+### Mutiple grid plots
+# Code correction - Add date from latest month/today's date
+# BUG - fix how to pick date in latest month
+# BUG - set xlims and ylims on plotting function
+
+###----  light-up feature
 plot_rollback <- oxcgrtdata %>% 
   select(CountryCode, region, ConfirmedCases, StringencyIndex, outoflockdown, newcases, openness_risk, rollback_score, Date) %>% 
   mutate(openness_risk = ifelse(openness_risk < 0, 0, openness_risk), 
@@ -93,24 +104,31 @@ plot_rollback <- plot_rollback %>% group_by(CountryCode) %>% arrange(CountryCode
          lag3_SI = lag(StringencyIndex, n = 3L), 
          lag4_SI = lag(StringencyIndex, n = 4L),
          lag5_SI = lag(StringencyIndex, n = 5L),
-    lightup_state = ifelse(StringencyIndex < 35 & (lag1_SI >= 35 | lag2_SI >= 35 | lag3_SI >= 35 | lag4_SI >= 35 | lag5_SI >= 35), 1, 0)) %>%
+    lightup_state = ifelse(StringencyIndex < 50 & (lag1_SI >= 50 | lag2_SI >= 50 | lag3_SI >= 50 | lag4_SI >= 50 | lag5_SI >= 50), 1, 0)) %>%
   select(-starts_with("lag"))
 
 theme_set(theme_gray())
 
-######-----------------SCATTER PLOTS--------------------------------------
+###--- HEADLINE GRAPH - Panel of last 4 months scatter plots
 
-## publish two plots - 
-## 1. Detailed and annotated chart of the latest data 
-## 2. Multiple grid plots of historical data - minimal detail
-
-### Mutiple grid plots
-# Code correction - Add date from latest month/today's date
-# BUG - fix how to pick date in latest month
-# BUG - set xlims and ylims on plotting function
+# CODE CLARIFICATION NOTE - Is two weeks old too old?
+# picking dates for panel display
 date <- lubridate::as_date(max(oxcgrtdata$Date)) - 14
+
 dateseq_scatter <- seq.Date(from = lubridate::as_date("2020-04-15"), to = lubridate::as_date(max(oxcgrtdata$Date)), by = 30)
-dateseq_scatter <- rlist::list.append(dateseq_scatter, date)
+dateseq_scatter <- dateseq_scatter[dateseq_scatter < date]
+
+if(length(dateseq_scatter) > 4){
+  dateseq_scatter <- dateseq_scatter[c(length(dateseq_scatter), 
+                                       length(dateseq_scatter) -1, 
+                                       length(dateseq_scatter) -2, 
+                                       length(dateseq_scatter) -3)]
+}
+if(length(dateseq_scatter) < 4){
+  dateseq_scatter <- rlist::list.append(dateseq_scatter, date)
+}
+
+dateseq_scatter <- dateseq_scatter[order(dateseq_scatter)]
 
 P <- list()
 for(d in dateseq_scatter){
@@ -120,7 +138,7 @@ for(d in dateseq_scatter){
 
 ## BUG fix - resize window properly - looks terrible on screen
 finalplot <- do.call(gridExtra::grid.arrange, P)
-ggsave(paste("../graphs/summary_scatterSIroll_latest", ".png", sep = ""), plot = finalplot,
+ggsave(paste("../graphs/new-score/summary_scatterSIroll_latest", ".png", sep = ""), plot = finalplot,
        width = 6, 
        height = 6)
 
@@ -133,17 +151,16 @@ ggsave(paste("../graphs/summary_scatterSIroll_latest", ".png", sep = ""), plot =
 
 #--- .GIF of scatter plot over time---
 
-scatterplot_frame <- ggplot(plot_rollback %>% filter(!is.na(lightup_state)) %>% arrange(Date),
+scatterplot_frame <- ggplot(plot_rollback %>% filter(Date < date) %>% arrange(Date),
                             aes(x = openness_risk, y = StringencyIndex, colour = factor(lightup_state), label = CountryCode)) + 
   geom_point(aes(size = newcases)) +
-  geom_point(aes(group = CountryCode)) +
   lims(colour = c("0", "1")) +
   geom_text_repel(data = subset(plot_rollback, key_country == 1 | lightup_state == 1 | (StringencyIndex < 35 & openness_risk > 0.4)), 
                 size = 3, colour  = "black") + 
   #    annotate(geom = "text", x = 0.01, y = 37, label = "Countries below this range are scaling back lockdown", 
   #             size = 1.5, hjust = "left") +
-  geom_hline(yintercept = 35, size = 0.3, linetype = 2) + 
-  geom_vline(xintercept = 0.4, size = 0.3, linetype = 2) +
+  geom_hline(yintercept = 50, size = 0.3, linetype = 2) + 
+  geom_vline(xintercept = 0.5, size = 0.3, linetype = 2) +
   labs(x = "Openness Risk", 
        y = "Stringency Index", 
        title = "Mapping Stringency Index and Rollback readiness", 
@@ -158,37 +175,23 @@ scatterplot_frame <- ggplot(plot_rollback %>% filter(!is.na(lightup_state)) %>% 
   ease_aes()
 
 rollback_anim <- animate(scatterplot_frame, fps = 2, width = 1000, height = 800, renderer = gifski_renderer(loop = F))
-save_animation(rollback_anim, file = "../bin/scatterplot_fps2.gif")
+save_animation(rollback_anim, file = "../graphs/gifs/scatterplot_fps2.gif")
 
-#--- .GIF of scatter plot over time---
-
-#-----------.GIF of current scatter plot contrasting countries either quadrant 
+#-----------.detailed scatter plot
 
 ## decide whether to include legend - plot looks better without the legend 
 ## calibrate size to newcases instead of Confirmed Cases?
 scatter.SI.rollback.detail(as.Date(date))
-ggsave(paste("../graphs/detail_scatterSIroll_latest", ".png", sep = ""), width = 10, 
+ggsave(paste("../graphs/new-score/detail_scatterSIroll_latest", ".png", sep = ""), width = 10, 
        height = 8)
 
-#-----------.GIF of current scatter plot contrasting countries either quadrant 
 
 
-
-
-
-
-
-# rollback_anim <- animate(rollback_plot, fps = 5, width = 1000, height = 500, renderer = gifski_renderer(loop = F))
-# save_animation(rollback_anim, file = "rollback_animation_fps5.gif")
-# 
-
-
-
-######-----------------SCATTER PLOTS--------------------------------------
+######-----------------TILE MAPS--------------------------------------
 
 for(r in region_list){
   p <- tilemap.regionwise(r)
-  ggsave(paste("../graphs/tilemap_latest_", r, ".png", sep = ""), width = 20, 
+  ggsave(paste("../graphs/new-score/tilemap_latest_", r, ".png", sep = ""), width = 20, 
          height = 10, plot = p)
 }
 
@@ -207,7 +210,7 @@ current.rollback.df <- current.rollback.df %>%
 
 chloro.daily <- ggplot(current.rollback.df, aes(x = index_name, y = forcats::fct_rev(CountryCode), fill = index_value)) +
   geom_tile(width = 0.95, height = 0.9) + 
-  scale_fill_viridis_c(name = "Scale (0-1)",na.value = "gray") +
+  scale_fill_viridis_c(name = "Scale (0-1)",na.value = "gray", direction = -1, breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
   theme(axis.text.y = element_text(size = 10), 
         axis.text.x = element_text(size = 8)) + 
   labs(y = "Country Code (ISO-3)", 
@@ -217,7 +220,7 @@ chloro.daily <- ggplot(current.rollback.df, aes(x = index_name, y = forcats::fct
                               "Openness Risk"), position = "top") +
   theme_classic()
 
-ggsave(paste("../graphs/dailytilemap_latest", ".png", sep = ""), width = 10, 
+ggsave(paste("../graphs/new-score/dailytilemap_latest", ".png", sep = ""), width = 10, 
        height = 25, plot = chloro.daily)
 
 
@@ -245,7 +248,7 @@ chloro.sum <- ggpubr::annotate_figure(chloro.sum,
                                       top = text_grob("Map of Openness Risk of countries over time", size = 14)) 
 
 
-ggsave(paste("../graphs/chloropleth_latest", ".png", sep = ""), width = 15, 
+ggsave(paste("../graphs/new-score/chloropleth_latest", ".png", sep = ""), width = 15, 
        height = 7.5, plot = chloro.sum)
 
 ####-------------------Diagnostics-----------------------
@@ -276,6 +279,8 @@ ggsave("../temp/hist_casescontrolled.png", width= 7.5,
 #' openness risk score.
 #' In contrast, cases_controlled_100k is a more lax measure, most countries score well, 
 #' thus get high rollback_readiness scores and lower openness risk score.
+#' UPDATE - Diagnostics suggest much flatter spread on openness risk once 
+#' old rollback score is used - using this for viz. 
 
 
 ####-------------------Diagnostics----------------------
