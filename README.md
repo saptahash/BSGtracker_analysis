@@ -1,7 +1,5 @@
 # BSG Tracker Rollback Analysis 
 
-## Visualising Rollback Scores of countries over time 
-
 <!---### Preliminary Analyses--->
 <!---###Distribution of Rollback scores over time---> 
 
@@ -24,7 +22,7 @@
 <!---###![Rollback scores as of 15-04-2020](/graphs/rollback_hist2020-06-24.png)--->
 
 
-#### Testing new graph plot window
+## Stringency Index against Openness Risk - Current and historical data
 <!---[Scatter SI vs Rollback](/graphs/detail_scatterSIroll2020-06-28.png)--->
 
 <img src="/graphs/detail_scatterSIroll_latest.png" width="600">
@@ -33,7 +31,11 @@
 
 <img src="/graphs/gifs/scatterplot_fps2.gif" width="600">
 
-### Heatmaps of rollback scores of countries over time 
+## Line plots of Stringency Index and Openness Risk
+
+![Lineplots of key countries](./graphs/lineplot_latest.png)
+
+## Heatmaps of rollback scores of countries over time 
 #### East Asia and Pacific 
 ![Tile map East Asia Pacific](./graphs/tilemap_latest_East_Asia_Pacific.png)
 
@@ -55,7 +57,7 @@
 #### Sub-Saharan Africa
 ![Tile map Subsaharan Africa](./graphs/tilemap_latest_sub_Saharan_Africa.png)
 
-### Chloropleth maps of rollback scores of countries (latest)
+### Tile maps of rollback scores of countries (latest)
 
 ![Chloropleth maps of rollback](./graphs/dailychloropleth_latest.png)
 
@@ -63,6 +65,3 @@
 
 ![Chloropleth maps of rollback](./graphs/chloropleth_latest.png)
 
-### Line plots of Stringency Index and Rollback readiness
-
-![Lineplots of key countries](./graphs/lineplot_latest.png)
