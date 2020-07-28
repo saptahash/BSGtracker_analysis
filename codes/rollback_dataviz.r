@@ -38,7 +38,8 @@ lineplot_rollback <- oxcgrtdata %>%
   mutate(openness_risk = ifelse(openness_risk < 0, 0, openness_risk),
     Date = lubridate::ymd(Date))
 
-country_lineplot <- c("CHN", "KOR", "FRA", "ITA", "GBR", "USA")
+country_lineplot <- c("CHN", "KOR", "FRA", "ITA", "GBR", "USA", "NZL", "IND", "GER", "RUS",
+                      "SWE", "AUS", "ZFA", "BRA")
 
 ggplot(lineplot_rollback %>% filter(CountryCode %in% country_lineplot), aes(x = Date, group = 1)) + 
   geom_line(aes(y = openness_risk)) + 
@@ -47,7 +48,7 @@ ggplot(lineplot_rollback %>% filter(CountryCode %in% country_lineplot), aes(x = 
     name = "Openness Risk", 
     sec.axis = sec_axis(~.*100, name = "Stringency Index")) + 
   scale_x_date(breaks = seq.Date(lubridate::ymd(min(lineplot_rollback$Date)), lubridate::ymd(max(lineplot_rollback$Date)),21)) + 
-  theme(axis.text.x = element_text(size = 6.5, angle = 0), 
+  theme(axis.text.x = element_text(size = 6.5, angle = 20), 
         axis.text.y.right = element_text(colour = "red"), 
         axis.title.y.right = element_text(colour = "red")) +
   facet_wrap(~ CountryName)
@@ -92,54 +93,17 @@ ggsave(paste("../graphs/summary_scatterSIroll_latest", ".png", sep = ""), plot =
        width = 6, 
        height = 6)
 
-### detailed plot 
+### detailed SCATTER plot 
 ## decide whether to include legend - plot looks better without the legend 
 ## calibrate size to newcases instead of Confirmed Cases?
 scatter.SI.rollback.detail(as.Date(date))
-ggsave(paste("../graphs/detail_scatterSIroll_latest", ".png", sep = ""), width = 8, 
+ggsave(paste("../graphs/detail_scatterSIroll_latest", ".png", sep = ""), width = 10, 
        height = 8)
+#' CODE NOTES:
+#' 1. Need to add two versions, one TR and one BL. TR looks bad - figure out
+#' 2. Change region color palette
+#' 3. v2 with countries that have recently entered stringency bar 
 
-
-
-
-### tried a 4 colour scheme, looks pretty bad - see if there's a way to improve this
-# p1 = ggplot(sample, aes(y = CountryCode, x = Date, fill = rollback_score)) + 
-#   geom_tile(width = 3, height = 1.5) +
-#   scale_fill_viridis_c(name = "Rollback Score") + 
-#   scale_x_date(breaks = seq.Date(lubridate::ymd(min(sample$Date)), lubridate::ymd(max(sample$Date)), 7)) + 
-#   theme(axis.text.y = element_text(size = 3), 
-#         axis.text.x = element_text(size = 6, angle = 10))
-# 
-# lineplot_oxcgrt <- lineplot_oxcgrt %>% 
-#   mutate(rollback_score = ifelse(rollback_score > 1, 1, rollback_score)) %>% 
-#            mutate(tilemap_color = case_when(rollback_score < 0.25 ~ 1, 
-#                                             rollback_score >= 0.25 & rollback_score < 0.5 ~ 2, 
-#                                             rollback_score >= 0.5 & rollback_score < 0.75 ~ 3, 
-#                                             rollback_score >= 0.75 ~ 4))
-
-
-### looks better with continuous plot
-### BUG - unable to change legend size etc. 
-# ggplot(plot_rollback %>% mutate() %>% filter(region == "Europe_Central_Asia") , 
-#        aes(y = CountryCode, x = Date, fill = recoded_rollback)) + 
-#   geom_tile(width = 0.9, height = 0.9) +
-#   scale_fill_viridis_c(name = "Rollback Readiness Index", na.value = "gray") +
-#   scale_x_date(breaks = seq.Date(lubridate::ymd(min(plot_rollback$Date)),
-#                                  lubridate::ymd(max(plot_rollback$Date) - 7), 7), 
-#                limits = c(lubridate::ymd("2020-04-01"), max(plot_rollback$Date) - 7), 
-#                expand = c(0,0)) + 
-#   theme(axis.text.y = element_text(size = 10), 
-#         axis.text.x = element_text(size = 6, angle = 10),
-#         panel.border = element_blank(),
-#         panel.grid.major = element_blank(),
-#         panel.grid.minor = element_blank(), 
-#         panel.background = element_blank(), 
-#         axis.line = element_line(colour = "black")) +
-#   theme_classic() + 
-#   labs(x = "Date", 
-#        y = "Country Code (ISO-3)")
-
-## generating and saving tile map
 
 for(r in region_list){
   p <- tilemap.regionwise(r)
@@ -172,7 +136,7 @@ chloro.daily <- ggplot(current.rollback.df, aes(x = index_name, y = forcats::fct
                               "Openness Risk"), position = "top") +
   theme_classic()
 
-ggsave(paste("../graphs/dailychloropleth_latest", ".png", sep = ""), width = 10, 
+ggsave(paste("../graphs/dailytilemap_latest", ".png", sep = ""), width = 10, 
        height = 25, plot = chloro.daily)
 
 
@@ -566,7 +530,44 @@ cc_map_a <- animate(ccmap, duration = 10, fps = 2, width = 1000, height = 500, r
 
 
 
+### tried a 4 colour scheme, looks pretty bad - see if there's a way to improve this
+# p1 = ggplot(sample, aes(y = CountryCode, x = Date, fill = rollback_score)) + 
+#   geom_tile(width = 3, height = 1.5) +
+#   scale_fill_viridis_c(name = "Rollback Score") + 
+#   scale_x_date(breaks = seq.Date(lubridate::ymd(min(sample$Date)), lubridate::ymd(max(sample$Date)), 7)) + 
+#   theme(axis.text.y = element_text(size = 3), 
+#         axis.text.x = element_text(size = 6, angle = 10))
+# 
+# lineplot_oxcgrt <- lineplot_oxcgrt %>% 
+#   mutate(rollback_score = ifelse(rollback_score > 1, 1, rollback_score)) %>% 
+#            mutate(tilemap_color = case_when(rollback_score < 0.25 ~ 1, 
+#                                             rollback_score >= 0.25 & rollback_score < 0.5 ~ 2, 
+#                                             rollback_score >= 0.5 & rollback_score < 0.75 ~ 3, 
+#                                             rollback_score >= 0.75 ~ 4))
 
+
+### looks better with continuous plot
+### BUG - unable to change legend size etc. 
+# ggplot(plot_rollback %>% mutate() %>% filter(region == "Europe_Central_Asia") , 
+#        aes(y = CountryCode, x = Date, fill = recoded_rollback)) + 
+#   geom_tile(width = 0.9, height = 0.9) +
+#   scale_fill_viridis_c(name = "Rollback Readiness Index", na.value = "gray") +
+#   scale_x_date(breaks = seq.Date(lubridate::ymd(min(plot_rollback$Date)),
+#                                  lubridate::ymd(max(plot_rollback$Date) - 7), 7), 
+#                limits = c(lubridate::ymd("2020-04-01"), max(plot_rollback$Date) - 7), 
+#                expand = c(0,0)) + 
+#   theme(axis.text.y = element_text(size = 10), 
+#         axis.text.x = element_text(size = 6, angle = 10),
+#         panel.border = element_blank(),
+#         panel.grid.major = element_blank(),
+#         panel.grid.minor = element_blank(), 
+#         panel.background = element_blank(), 
+#         axis.line = element_line(colour = "black")) +
+#   theme_classic() + 
+#   labs(x = "Date", 
+#        y = "Country Code (ISO-3)")
+
+## generating and saving tile map
 
 
 
