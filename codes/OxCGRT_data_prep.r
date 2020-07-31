@@ -132,9 +132,9 @@ write.csv(apple.mobility, file = paste("../data/input/applemobility_", data_date
 ### Use these as back-ups for debugging/testing
 ###############
 
-#google.mobility <- read.csv(file = paste("./data/input/googlemobility_", data_date, ".csv", sep = ""), stringsAsFactors = FALSE)
+google.mobility <- read.csv(file = paste("../data/input/googlemobility_", data_date, ".csv", sep = ""))
 #oxcgrtdata <- read.csv(file = paste("OxCGRT_", data_date, ".csv", sep = ""), stringsAsFactors = FALSE)
-#apple.mobility <- read.csv(file = paste("./data/input/applemobility_", data_date, ".csv", sep = ""), stringsAsFactors = F)
+apple.mobility <- read.csv(file = paste("../data/input/applemobility_", data_date, ".csv", sep = ""))
 
 oxcgrtdata <- left_join(oxcgrtdata, google.mobility %>% select(starts_with("goog_"), country_region_code, date), 
                by = c("CountryCode" = "country_region_code", "Date" = "date"))
