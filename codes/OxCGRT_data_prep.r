@@ -72,7 +72,7 @@ write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", 
 url_gmobility <- "https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv"
 
 google.mobility <- read_csv(url(url_gmobility))
-
+# BUG - column parsing isn't correct - metro_area isn't being read as text
 # Stata diff: Date already stored as date - no need to change
 
 #changing country codes from iso2c to iso3c
@@ -94,7 +94,7 @@ google.mobility <- google.mobility %>% rename(goog_retail = starts_with("retail"
                                               goog_workplaces = starts_with("workplaces"), 
                                               goog_residential = starts_with("residential"))
 
-google.mobility <- google.mobility %>% filter(is.na(sub_region_1))
+google.mobility <- google.mobility %>% filter(is.na(sub_region_1) & is.na(sub_region_2) & is.na(metro_area))
 
 write.csv(google.mobility, file = paste("../data/input/googlemobility_", data_date, ".csv", sep = ""))
 
