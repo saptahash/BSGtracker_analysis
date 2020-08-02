@@ -71,7 +71,9 @@ write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", 
 
 url_gmobility <- "https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv"
 
-google.mobility <- read_csv(url(url_gmobility))
+google.mobility <- read_csv(url(url_gmobility), col_types = cols(sub_region_1 = col_character(), 
+                                                                 sub_region_2 = col_character(), 
+                                                                 metro_area = col_character()))
 # BUG - column parsing isn't correct - metro_area isn't being read as text
 # Stata diff: Date already stored as date - no need to change
 
