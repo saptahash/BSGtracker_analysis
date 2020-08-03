@@ -13,6 +13,8 @@ oxcgrtdata <- read.csv(file = paste("../data/output/OxCGRT_", data_date, ".csv",
 
 # Filling in gaps in indicators
 ## Code Optimisation Notes - can use lapply here
+# BUG WARNING - if not converted to csv, some issues where "H3_Contact.Tracing" doesn't exist 
+# -> it's stored as "H3_Contact Tracing"
 oxcgrtdata <- oxcgrtdata %>% arrange(CountryCode, Date) %>% group_by(CountryCode) %>%
   mutate(H3_Contact.tracing_1 = H3_Contact.tracing, 
          H2_Testing.policy_1 = H2_Testing.policy, 

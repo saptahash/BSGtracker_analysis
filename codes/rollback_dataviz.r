@@ -1,3 +1,7 @@
+#########################
+###---------- DATA VISUALISATION CODE FOR OPENNESS RISK INDEX
+#########################
+
 library("ggplot2")
 library("sf")
 library("rnaturalearth")
@@ -92,7 +96,7 @@ save_animation(lineplot_anim, file = "../temp/lineplot_fps2.gif")
 
 ###----  light-up feature
 plot_rollback <- oxcgrtdata %>% 
-  select(CountryCode, region, ConfirmedCases, StringencyIndex, outoflockdown, newcases, openness_risk, rollback_score, Date) %>% 
+  select(CountryCode, region, ConfirmedCases, StringencyIndex, newcases, openness_risk, rollback_score, Date) %>% 
   mutate(openness_risk = ifelse(openness_risk < 0, 0, openness_risk), 
          Date = lubridate::ymd(Date), 
          key_country = ifelse(CountryCode %in% country_lineplot, 1, 0)) %>%
@@ -251,27 +255,27 @@ chloro.sum <- ggpubr::annotate_figure(chloro.sum,
 ggsave(paste("../graphs/new-score/chloropleth_latest", ".png", sep = ""), width = 15, 
        height = 7.5, plot = chloro.sum)
 
-####-------------------Diagnostics-----------------------
-ggplot(plot_rollback %>% filter(Date == as.Date(date)), aes(x = openness_risk)) + 
-  geom_histogram(binwidth = 0.015)
-ggsave("../temp/hist_opennessrisk_latest.png", width= 7.5, 
-       height = 7.5)
-
-ggplot(plot_rollback %>% filter(Date == as.Date(date)), aes(x = rollback_score)) + 
-  geom_histogram(binwidth = 0.015)
-ggsave("../temp/hist_rollbackcsore.png", width= 7.5, 
-       height = 7.5)
-## observations - flatter spread on rollback_score, openness risk doesn't reach extremes beyond 0.7!
-
-ggplot(oxcgrtdata %>% filter(Date == as.Date(date)), aes(x = cases_controlled_per100k)) + 
-  geom_histogram(binwidth = 0.015)
-ggsave("../temp/hist_casescontrolled100k.png", width= 7.5, 
-       height = 7.5)
-
-ggplot(oxcgrtdata %>% filter(Date == as.Date(date)), aes(x = cases_controlled)) + 
-  geom_histogram(binwidth = 0.015)
-ggsave("../temp/hist_casescontrolled.png", width= 7.5, 
-       height = 7.5)
+####-------------------Diagnostics (START)-----------------------
+# ggplot(plot_rollback %>% filter(Date == as.Date(date)), aes(x = openness_risk)) + 
+#   geom_histogram(binwidth = 0.015)
+# ggsave("../temp/hist_opennessrisk_latest.png", width= 7.5, 
+#        height = 7.5)
+# 
+# ggplot(plot_rollback %>% filter(Date == as.Date(date)), aes(x = rollback_score)) + 
+#   geom_histogram(binwidth = 0.015)
+# ggsave("../temp/hist_rollbackcsore.png", width= 7.5, 
+#        height = 7.5)
+# ## observations - flatter spread on rollback_score, openness risk doesn't reach extremes beyond 0.7!
+# 
+# ggplot(oxcgrtdata %>% filter(Date == as.Date(date)), aes(x = cases_controlled_per100k)) + 
+#   geom_histogram(binwidth = 0.015)
+# ggsave("../temp/hist_casescontrolled100k.png", width= 7.5, 
+#        height = 7.5)
+# 
+# ggplot(oxcgrtdata %>% filter(Date == as.Date(date)), aes(x = cases_controlled)) + 
+#   geom_histogram(binwidth = 0.015)
+# ggsave("../temp/hist_casescontrolled.png", width= 7.5, 
+#        height = 7.5)
 
 #' likely cause of disparity - cases_controlled and cases_controlled_per100k give fairly 
 #' different distributions. cases_controlled is a much stricter measure, leads to more 
@@ -283,7 +287,7 @@ ggsave("../temp/hist_casescontrolled.png", width= 7.5,
 #' old rollback score is used - using this for viz. 
 
 
-####-------------------Diagnostics----------------------
+####-------------------Diagnostics (END)----------------------
 
 
 
