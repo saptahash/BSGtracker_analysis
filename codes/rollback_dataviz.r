@@ -175,12 +175,14 @@ save_animation(rollback_anim, file = "../graphs/gifs/scatterplot_fps2.gif")
 
 ### ----------------- TILE MAPS --------------------------------------
 
+###------------summary tile map
 for(r in region_list){
   p <- tilemap.regionwise(r)
   ggsave(paste("../graphs/new-score/tilemap_latest_", r, ".png", sep = ""), width = 20, 
          height = 10, plot = p)
 }
 
+### -------- DAILY TILE MAP
 current.rollback.df <- oxcgrtdata %>% filter(Date == as.Date(date)) %>% 
   select(CountryCode, openness_risk, community_understanding, 
          test_and_trace, manage_imported_cases, cases_controlled, region) %>%
@@ -197,18 +199,19 @@ current.rollback.df <- current.rollback.df %>%
 daily.heatmap.title <- paste("Heatmap of Openness Risk and it's breakdown for", as.Date(date))
 chloro.daily <- ggplot(current.rollback.df, aes(x = index_name, y = forcats::fct_rev(CountryCode), fill = index_value)) +
   geom_tile(width = 0.95, height = 0.9) + 
+  theme_classic() +
   scale_fill_viridis_c(name = "Scale (0-1)",na.value = "gray", direction = -1, breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
   theme(axis.text.y = element_text(size = 10), 
         axis.text.x = element_text(size = 8),
-        plot.caption = element_text(hjust = 0.0)) + 
+        plot.caption = element_text(hjust = 0.0, face = "italic"), 
+        plot.title = element_text(hjust = 0.5)) + 
   labs(y = "Country Code (ISO-3)", 
        x = "", 
        caption = "Source: Oxford COVID-19 Government Response Tracker. More at https://github.com/OxCGRT/covid-policy-tracker or bsg.ox.ac.uk/covidtracker", 
        title = daily.heatmap.title) +
   scale_x_discrete(limits = c("Cases Controlled", "Community Understanding", 
                               "Imported Cases", "Test and Trace", 
-                              "Openness Risk"), position = "top") +
-  theme_classic()
+                              "Openness Risk"), position = "top")
 
 ggsave(paste("../graphs/new-score/dailytilemap_latest", ".png", sep = ""), width = 10, 
        height = 25, plot = chloro.daily)
@@ -531,107 +534,107 @@ ggsave(paste("../graphs/new-score/chloropleth_latest", ".png", sep = ""), width 
 ############### ROUGH CODE
 ##########
 
-
-
-#save_animation(rollback_anim, file = "rollback.gif")
-
-world <- ne_countries(scale = "medium",returnclass = "sf")
-class(world)
-
-ggplot(data = world) + geom_sf()
-
-ggplot(data = world) + geom_sf(color = "black", fill = "lightgreen") +
-  xlab("Longitude") + ylab("Latitude") + 
-  ggtitle("World Map", subtitle = paste0(length(unique(world$name)), " countries"))
-
-oxcgrt_world <- left_join(world, sample,
-                          by = c("iso_a3" = "CountryCode"))
-
-ccmap <- ggplot(data = oxcgrt_world %>% mutate(Date = lubridate::ymd(Date)) %>% arrange(Date)) +
-  geom_sf(aes(fill = ConfirmedCases)) + 
-  scale_fill_viridis_c(name = "ConfirmedCases") + 
-  transition_manual(Date) + 
-  ease_aes()
-
-sample <- oxcgrtdata %>% select(CountryCode, Date, ConfirmedCases) %>%
-  mutate(Date = lubridate::ymd(Date)) %>% filter(Date > "2020-03-03" & Date < "2020-06-03")
-
-gganimate(cc_map, "cc_map.gif", title_frame = T)
-save_animation(cc_map_a, file = "cc_map.gif")
-
-
-oxcgrt_world <- oxcgrt_world %>% group_by(iso_a3) %>% mutate(Date = as.Date(Date)) 
-
-cc_map <- ggplot(oxcgrt_world %>% arrange(Date)) + 
-  geom_sf(aes(fill = ConfirmedCases)) + 
-  scale_fill_viridis_c(name = "ConfirmedCases")
-transition_time(Date) +
-  ease_aes() 
-
-
-
-
-ggplot(oxcgrtdata %>% select(CountryCode, Date, ConfirmedCases, popWB, rollback_score) %>% mutate(casespercapita = ConfirmedCases/popWB) %>% filter(CountryCode == "GBR"), aes(x = Date, y = casespercapita, group = 1)) +
-  geom_line() +
-  geom_point()
-
-cases_map <- ggplot(oxcgrtdata %>% select(CountryCode, Date, ConfirmedCases)) + 
-  geom_sf()
-
-cpc_end <- 
-  
-  sample_dates <- sample %>% sample_frac(0.1)
-
-
-ggplot(sample, aes(x = newcases, y = rollback_score, label = Date)) + 
-  geom_point() +
-  geom_segment(aes(xend = c(tail(newcases, n= -1), NA), yend = c(tail(rollback_score,n = -1), NA)), 
-               arrow = arrow(length = unit(0.2, "cm"))) + 
-  geom_text_repel(data = sample_dates) + 
-  theme_light()
-
-
-cc_map_a <- animate(ccmap, duration = 10, fps = 2, width = 1000, height = 500, renderer = gifski_renderer())
-
-
-
-
-### tried a 4 colour scheme, looks pretty bad - see if there's a way to improve this
-# p1 = ggplot(sample, aes(y = CountryCode, x = Date, fill = rollback_score)) + 
-#   geom_tile(width = 3, height = 1.5) +
-#   scale_fill_viridis_c(name = "Rollback Score") + 
-#   scale_x_date(breaks = seq.Date(lubridate::ymd(min(sample$Date)), lubridate::ymd(max(sample$Date)), 7)) + 
-#   theme(axis.text.y = element_text(size = 3), 
-#         axis.text.x = element_text(size = 6, angle = 10))
 # 
-# lineplot_oxcgrt <- lineplot_oxcgrt %>% 
-#   mutate(rollback_score = ifelse(rollback_score > 1, 1, rollback_score)) %>% 
-#            mutate(tilemap_color = case_when(rollback_score < 0.25 ~ 1, 
-#                                             rollback_score >= 0.25 & rollback_score < 0.5 ~ 2, 
-#                                             rollback_score >= 0.5 & rollback_score < 0.75 ~ 3, 
-#                                             rollback_score >= 0.75 ~ 4))
-
-
-### looks better with continuous plot
-### BUG - unable to change legend size etc. 
-# ggplot(plot_rollback %>% mutate() %>% filter(region == "Europe_Central_Asia") , 
-#        aes(y = CountryCode, x = Date, fill = recoded_rollback)) + 
-#   geom_tile(width = 0.9, height = 0.9) +
-#   scale_fill_viridis_c(name = "Rollback Readiness Index", na.value = "gray") +
-#   scale_x_date(breaks = seq.Date(lubridate::ymd(min(plot_rollback$Date)),
-#                                  lubridate::ymd(max(plot_rollback$Date) - 7), 7), 
-#                limits = c(lubridate::ymd("2020-04-01"), max(plot_rollback$Date) - 7), 
-#                expand = c(0,0)) + 
-#   theme(axis.text.y = element_text(size = 10), 
-#         axis.text.x = element_text(size = 6, angle = 10),
-#         panel.border = element_blank(),
-#         panel.grid.major = element_blank(),
-#         panel.grid.minor = element_blank(), 
-#         panel.background = element_blank(), 
-#         axis.line = element_line(colour = "black")) +
-#   theme_classic() + 
-#   labs(x = "Date", 
-#        y = "Country Code (ISO-3)")
+# 
+# #save_animation(rollback_anim, file = "rollback.gif")
+# 
+# world <- ne_countries(scale = "medium",returnclass = "sf")
+# class(world)
+# 
+# ggplot(data = world) + geom_sf()
+# 
+# ggplot(data = world) + geom_sf(color = "black", fill = "lightgreen") +
+#   xlab("Longitude") + ylab("Latitude") + 
+#   ggtitle("World Map", subtitle = paste0(length(unique(world$name)), " countries"))
+# 
+# oxcgrt_world <- left_join(world, sample,
+#                           by = c("iso_a3" = "CountryCode"))
+# 
+# ccmap <- ggplot(data = oxcgrt_world %>% mutate(Date = lubridate::ymd(Date)) %>% arrange(Date)) +
+#   geom_sf(aes(fill = ConfirmedCases)) + 
+#   scale_fill_viridis_c(name = "ConfirmedCases") + 
+#   transition_manual(Date) + 
+#   ease_aes()
+# 
+# sample <- oxcgrtdata %>% select(CountryCode, Date, ConfirmedCases) %>%
+#   mutate(Date = lubridate::ymd(Date)) %>% filter(Date > "2020-03-03" & Date < "2020-06-03")
+# 
+# gganimate(cc_map, "cc_map.gif", title_frame = T)
+# save_animation(cc_map_a, file = "cc_map.gif")
+# 
+# 
+# oxcgrt_world <- oxcgrt_world %>% group_by(iso_a3) %>% mutate(Date = as.Date(Date)) 
+# 
+# cc_map <- ggplot(oxcgrt_world %>% arrange(Date)) + 
+#   geom_sf(aes(fill = ConfirmedCases)) + 
+#   scale_fill_viridis_c(name = "ConfirmedCases")
+# transition_time(Date) +
+#   ease_aes() 
+# 
+# 
+# 
+# 
+# ggplot(oxcgrtdata %>% select(CountryCode, Date, ConfirmedCases, popWB, rollback_score) %>% mutate(casespercapita = ConfirmedCases/popWB) %>% filter(CountryCode == "GBR"), aes(x = Date, y = casespercapita, group = 1)) +
+#   geom_line() +
+#   geom_point()
+# 
+# cases_map <- ggplot(oxcgrtdata %>% select(CountryCode, Date, ConfirmedCases)) + 
+#   geom_sf()
+# 
+# cpc_end <- 
+#   
+#   sample_dates <- sample %>% sample_frac(0.1)
+# 
+# 
+# ggplot(sample, aes(x = newcases, y = rollback_score, label = Date)) + 
+#   geom_point() +
+#   geom_segment(aes(xend = c(tail(newcases, n= -1), NA), yend = c(tail(rollback_score,n = -1), NA)), 
+#                arrow = arrow(length = unit(0.2, "cm"))) + 
+#   geom_text_repel(data = sample_dates) + 
+#   theme_light()
+# 
+# 
+# cc_map_a <- animate(ccmap, duration = 10, fps = 2, width = 1000, height = 500, renderer = gifski_renderer())
+# 
+# 
+# 
+# 
+# ### tried a 4 colour scheme, looks pretty bad - see if there's a way to improve this
+# # p1 = ggplot(sample, aes(y = CountryCode, x = Date, fill = rollback_score)) + 
+# #   geom_tile(width = 3, height = 1.5) +
+# #   scale_fill_viridis_c(name = "Rollback Score") + 
+# #   scale_x_date(breaks = seq.Date(lubridate::ymd(min(sample$Date)), lubridate::ymd(max(sample$Date)), 7)) + 
+# #   theme(axis.text.y = element_text(size = 3), 
+# #         axis.text.x = element_text(size = 6, angle = 10))
+# # 
+# # lineplot_oxcgrt <- lineplot_oxcgrt %>% 
+# #   mutate(rollback_score = ifelse(rollback_score > 1, 1, rollback_score)) %>% 
+# #            mutate(tilemap_color = case_when(rollback_score < 0.25 ~ 1, 
+# #                                             rollback_score >= 0.25 & rollback_score < 0.5 ~ 2, 
+# #                                             rollback_score >= 0.5 & rollback_score < 0.75 ~ 3, 
+# #                                             rollback_score >= 0.75 ~ 4))
+# 
+# 
+# ### looks better with continuous plot
+# ### BUG - unable to change legend size etc. 
+# # ggplot(plot_rollback %>% mutate() %>% filter(region == "Europe_Central_Asia") , 
+# #        aes(y = CountryCode, x = Date, fill = recoded_rollback)) + 
+# #   geom_tile(width = 0.9, height = 0.9) +
+# #   scale_fill_viridis_c(name = "Rollback Readiness Index", na.value = "gray") +
+# #   scale_x_date(breaks = seq.Date(lubridate::ymd(min(plot_rollback$Date)),
+# #                                  lubridate::ymd(max(plot_rollback$Date) - 7), 7), 
+# #                limits = c(lubridate::ymd("2020-04-01"), max(plot_rollback$Date) - 7), 
+# #                expand = c(0,0)) + 
+# #   theme(axis.text.y = element_text(size = 10), 
+# #         axis.text.x = element_text(size = 6, angle = 10),
+# #         panel.border = element_blank(),
+# #         panel.grid.major = element_blank(),
+# #         panel.grid.minor = element_blank(), 
+# #         panel.background = element_blank(), 
+# #         axis.line = element_line(colour = "black")) +
+# #   theme_classic() + 
+# #   labs(x = "Date", 
+# #        y = "Country Code (ISO-3)")
 
 ## generating and saving tile map
 

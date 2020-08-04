@@ -84,6 +84,7 @@ tilemap.regionwise <- function(region_name){
                  limits = c(lubridate::ymd("2020-04-01"), max(plot_rollback$Date) - 7), 
                  expand = c(0,0)) + 
     scale_y_discrete(limits = rev(levels(plot_rollback$CountryCode))) +
+    theme_classic() +
     theme(axis.text.y = element_text(size = 10), 
           axis.text.x = element_text(size = 6, angle = 10),
           panel.border = element_blank(),
@@ -91,9 +92,8 @@ tilemap.regionwise <- function(region_name){
           panel.grid.minor = element_blank(), 
           panel.background = element_blank(), 
           axis.line = element_line(colour = "black"), 
-          plot.caption = element_text(hjust = 1, face = "italic"), 
+          plot.caption = element_text(hjust = 0.0, face = "italic"), 
           plot.title = element_text(hjust = 0.5)) +
-    theme_classic() +
     labs(x = "Date", 
          y = "Country Code (ISO-3)", 
          title = tilemap.title,
