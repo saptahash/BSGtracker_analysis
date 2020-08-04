@@ -11,39 +11,43 @@ library(gganimate)
 library(plotly)
 library(ggpubr)
 
+## Bring in functions file
 source("rollbackviz_fun.r")
-# ## Visualise general spread of rollback scores - what does the distribution look like over time? 
-# 
-# ## Comments - Fix labels + collect all in one panel
-# date_seq <- seq.Date(from = lubridate::ymd('2020-04-01'), to = max(lineplot_oxcgrt$Date), by = 7)
-# 
-# 
-# P <- list()  
-# for(date in date_seq){
-#   p <- rollback.hist(lineplot_oxcgrt, zoo::as.Date(date))
-#   P <- c(p, list(P))
-#   ggsave(paste("./graphs/rollback_hist", zoo::as.Date(date), ".png", sep = ""), plot = p)
-# }
-# 
-# ### missing feat - need to save all these in a single page
-# 
-# ## Two way line plot of Stringency/Government Response Index v/s rollback_scores
-# countrylist <- c("CHN", "KOR", "FRA", "ITA", "GBR", "USA", "ESP")
-# 
-# twoaxis.line(lineplot_oxcgrt, "USA")
-# 
-# for(country in countrylist){
-#   p <- twoaxis.line(lineplot_oxcgrt, country)
-#   #ggsave
-# }
 
+## set theme
+theme_set(theme_gray())
+
+##-----selecting important columns for further analysis------------------- 
+
+## To be used to make lineplots
 lineplot_rollback <- oxcgrtdata %>% 
   select(CountryCode, region, openness_risk, StringencyIndex, CountryName, Date) %>% 
   mutate(openness_risk = ifelse(openness_risk < 0, 0, openness_risk),
     Date = lubridate::ymd(Date))
 
+## for practically all other plots
+plot_rollback <- oxcgrtdata %>% 
+  select(CountryCode, region, ConfirmedCases, StringencyIndex, newcases, openness_risk, rollback_score, Date) %>% 
+  mutate(openness_risk = ifelse(openness_risk < 0, 0, openness_risk), 
+         Date = lubridate::ymd(Date), 
+         key_country = ifelse(CountryCode %in% country_lineplot, 1, 0)) %>%
+  filter(Date > "2020-04-01")
+
+plot_rollback <- plot_rollback %>% group_by(CountryCode) %>% arrange(CountryCode, Date) %>%
+  mutate(lag1_SI = lag(StringencyIndex, n = 1L), 
+         lag2_SI = lag(StringencyIndex, n = 2L), 
+         lag3_SI = lag(StringencyIndex, n = 3L), 
+         lag4_SI = lag(StringencyIndex, n = 4L),
+         lag5_SI = lag(StringencyIndex, n = 5L),
+         lightup_state = ifelse(StringencyIndex < 50 & (lag1_SI >= 50 | lag2_SI >= 50 | lag3_SI >= 50 | lag4_SI >= 50 | lag5_SI >= 50), 1, 0)) %>%
+  select(-starts_with("lag"))
+
+##------select key countries to be labelled and charted in line plot---------
+
 country_lineplot <- c("CHN", "KOR", "FRA", "ITA", "GBR", "USA", "NZL", "IND", "GER", "RUS",
                       "SWE", "AUS", "ZFA", "BRA")
+
+##----------- HEADLINE LINE PLOT - Panel of 12 countries --------------------
 
 ggplot(lineplot_rollback %>% filter(CountryCode %in% country_lineplot), aes(x = Date, group = 1)) + 
   geom_line(aes(y = openness_risk)) + 
@@ -54,12 +58,17 @@ ggplot(lineplot_rollback %>% filter(CountryCode %in% country_lineplot), aes(x = 
   scale_x_date(breaks = seq.Date(lubridate::ymd(min(lineplot_rollback$Date)), lubridate::ymd(max(lineplot_rollback$Date)),21)) + 
   theme(axis.text.x = element_text(size = 6.5, angle = 20), 
         axis.text.y.right = element_text(colour = "red"), 
-        axis.title.y.right = element_text(colour = "red")) +
+        axis.title.y.right = element_text(colour = "red"), 
+        plot.caption = element_text(hjust = 0.0, face = "italic"), 
+        plot.title = element_text(hjust = 0.5)) + 
+  labs(title = "Openness Risk Index and Stringency Index of twelve countries over time",
+       caption = "Source: Oxford COVID-19 Government Response Tracker. More at https://github.com/OxCGRT/covid-policy-tracker 
+       or bsg.ox.ac.uk/covidtracker") + 
   facet_wrap(~ CountryName)
 
 ggsave(paste("../graphs/new-score/lineplot_latest", ".png", sep = ""),
-       width = 18, 
-       height = 7)
+       width = 16, 
+       height = 8)
 
 ###---------Lineplots GIFs--------------
 lineplot_gif <- ggplot(lineplot_rollback %>% filter(CountryCode %in% country_lineplot), aes(x = Date, group = 1)) + 
@@ -95,23 +104,7 @@ save_animation(lineplot_anim, file = "../temp/lineplot_fps2.gif")
 # BUG - set xlims and ylims on plotting function
 
 ###----  light-up feature
-plot_rollback <- oxcgrtdata %>% 
-  select(CountryCode, region, ConfirmedCases, StringencyIndex, newcases, openness_risk, rollback_score, Date) %>% 
-  mutate(openness_risk = ifelse(openness_risk < 0, 0, openness_risk), 
-         Date = lubridate::ymd(Date), 
-         key_country = ifelse(CountryCode %in% country_lineplot, 1, 0)) %>%
-  filter(Date > "2020-04-01")
 
-plot_rollback <- plot_rollback %>% group_by(CountryCode) %>% arrange(CountryCode, Date) %>%
-  mutate(lag1_SI = lag(StringencyIndex, n = 1L), 
-         lag2_SI = lag(StringencyIndex, n = 2L), 
-         lag3_SI = lag(StringencyIndex, n = 3L), 
-         lag4_SI = lag(StringencyIndex, n = 4L),
-         lag5_SI = lag(StringencyIndex, n = 5L),
-    lightup_state = ifelse(StringencyIndex < 50 & (lag1_SI >= 50 | lag2_SI >= 50 | lag3_SI >= 50 | lag4_SI >= 50 | lag5_SI >= 50), 1, 0)) %>%
-  select(-starts_with("lag"))
-
-theme_set(theme_gray())
 
 ###--- HEADLINE GRAPH - Panel of last 4 months scatter plots
 
