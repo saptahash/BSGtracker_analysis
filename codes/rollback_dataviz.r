@@ -214,7 +214,7 @@ ggsave(paste("../graphs/new-score/dailytilemap_latest", ".png", sep = ""), width
        height = 25, plot = chloro.daily)
 
 
-
+### ---------------------------- Chloropleth Maps -------------------------
 ### generating time based maps 
 
 
@@ -226,17 +226,7 @@ world <- ne_countries(scale = "medium",returnclass = "sf")
 
 map_df <- left_join(world, plot_rollback, by = c("iso_a3" = "CountryCode"))
 
-P <- list()
-for(date in dateseq_scatter){
-  p <- chloropleth.map.summary(as.Date(date))
-  P <- c(P, list(p))
-}
-
-chloro.sum <- ggpubr::ggarrange(plotlist = P, common.legend = T, legend = "right", vjust = 1)
-
-chloro.sum <- ggpubr::annotate_figure(chloro.sum,
-                                      top = text_grob("Map of Openness Risk of countries over time", size = 14)) 
-
+chloro.sum <- chloropleth.map.summary(dateseq_scatter)
 
 ggsave(paste("../graphs/new-score/chloropleth_latest", ".png", sep = ""), width = 15, 
        height = 7.5, plot = chloro.sum)
