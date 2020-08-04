@@ -73,6 +73,7 @@ scatter.SI.rollback.detail <- function(date){
 
 
 tilemap.regionwise <- function(region_name){
+  tilemap.title = paste("Heatmap of Openness Risk over time for", region_name, "region", sep = " ")
   ggplot(plot_rollback %>% arrange(CountryCode, Date) %>% ungroup() %>%
            filter(region == region_name) , 
          aes(y = forcats::fct_rev(CountryCode), x = Date, fill = scales::rescale(openness_risk, to = c(0,1)))) + 
@@ -89,10 +90,14 @@ tilemap.regionwise <- function(region_name){
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(), 
           panel.background = element_blank(), 
-          axis.line = element_line(colour = "black")) +
+          axis.line = element_line(colour = "black"), 
+          plot.caption = element_text(hjust = 1, face = "italic"), 
+          plot.title = element_text(hjust = 0.5)) +
     theme_classic() +
     labs(x = "Date", 
-         y = "Country Code (ISO-3)")
+         y = "Country Code (ISO-3)", 
+         title = tilemap.title,
+         caption = "Source: Oxford COVID-19 Government Response Tracker. More at https://github.com/OxCGRT/covid-policy-tracker or bsg.ox.ac.uk/covidtracker") 
 }
 
 chloropleth.map.summary <- function(date){

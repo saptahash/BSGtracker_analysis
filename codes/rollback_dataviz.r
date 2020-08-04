@@ -145,7 +145,7 @@ ggsave(paste("../graphs/new-score/detail_scatterSIroll_latest", ".png", sep = ""
 #' 2. Change region color palette
 #' 3. v2 with countries that have recently entered stringency bar 
 
-#--- .GIF of scatter plot over time---
+#---------------------------- .GIF of scatter plot over time -----------------------
 
 scatterplot_frame <- ggplot(plot_rollback %>% filter(Date < date) %>% arrange(Date),
                             aes(x = openness_risk, y = StringencyIndex, colour = factor(lightup_state), label = CountryCode)) + 
@@ -173,11 +173,7 @@ scatterplot_frame <- ggplot(plot_rollback %>% filter(Date < date) %>% arrange(Da
 rollback_anim <- animate(scatterplot_frame, fps = 2, width = 1000, height = 800, renderer = gifski_renderer(loop = F))
 save_animation(rollback_anim, file = "../graphs/gifs/scatterplot_fps2.gif")
 
-
-
-
-
-######-----------------TILE MAPS--------------------------------------
+### ----------------- TILE MAPS --------------------------------------
 
 for(r in region_list){
   p <- tilemap.regionwise(r)
