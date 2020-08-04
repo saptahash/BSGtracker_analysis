@@ -45,7 +45,7 @@ scatter.SI.rollback <- function(dateseq_scatter){
 
 scatter.SI.rollback.detail <- function(date){
   theme_set(theme_gray())
-  scatter.plot.subtitle <- paste("Date: ", date, sep = "")
+  scatter.plot.title <- paste("Stringency Index and Openness Risk as of ", lubridate::as_date(date), sep = "")
   ggplot(plot_rollback %>% filter(Date == date), aes(x = openness_risk, color = factor(lightup_state), y = StringencyIndex,label = CountryCode)) +  #color = factor(outoflockdown), 
     geom_point(aes(size = newcases)) + 
     lims(colour = c("0", "1")) + 
@@ -55,13 +55,17 @@ scatter.SI.rollback.detail <- function(date){
 #             size = 2.5, hjust = "left") +
     geom_hline(yintercept = 50, size = 0.3, linetype = 2) + 
     geom_vline(xintercept = 0.5, size = 0.3, linetype = 2) +
+    theme(plot.title = element_text(hjust = 0.5), 
+          plot.caption = element_text(hjust = 0.0, face = "italic"), 
+          plot.subtitle = element_text(hjust = 0.5, size = 10)) +
     labs(x = "Openness Risk", 
          y = "Stringency Index", 
-         title = "Mapping Stringency Index and Openness Risk", 
-         subtitle = scatter.plot.subtitle) + 
+         subtitle = "(Bubble size reflects number of new cases)", 
+         title = scatter.plot.title,
+         caption = "Source: Oxford COVID-19 Government Response Tracker. More at https://github.com/OxCGRT/covid-policy-tracker or bsg.ox.ac.uk/covidtracker") + 
     guides(size = F) + 
 #    viridis::scale_colour_viridis(discrete = T) +
-    scale_y_continuous(breaks = c(25, 35, 50, 75, 100)) + 
+    scale_y_continuous(breaks = c(25, 50, 75, 100)) + 
     scale_x_continuous(breaks = c(seq(from = 0, to = 1, by = 0.2))) +
     scale_colour_discrete(name = "", breaks = c(1), labels = c("Dropped stringency levels in past week")) +
     scale_size(range = c(3,9))

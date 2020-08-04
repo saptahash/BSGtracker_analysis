@@ -127,12 +127,6 @@ if(length(dateseq_scatter) < 4){
 
 dateseq_scatter <- dateseq_scatter[order(dateseq_scatter)]
 
-P <- list()
-for(d in dateseq_scatter){
-  p <- scatter.SI.rollback(as.Date(d))
-  P <- c(P, list(p))
-}
-
 ##---------------------- HEADLINE SUMMARY SCATTER PLOT ------------------
 finalplot <- scatter.SI.rollback(dateseq_scatter)
 
@@ -140,7 +134,11 @@ ggsave(paste("../graphs/new-score/summary_scatterSIroll_latest", ".png", sep = "
        width = 12, 
        height = 8)
 
-# -----------------------  HEADLINE SCATTER PLOTS ------------------------#
+## -----------------------  HEADLINE DETAILED SCATTER PLOTS ------------------------
+scatter.SI.rollback.detail(as.Date(date))
+
+ggsave(paste("../graphs/new-score/detail_scatterSIroll_latest", ".png", sep = ""), width = 10, 
+       height = 8)
 
 #' CODE NOTES:
 #' 1. Need to add two versions, one TR and one BL. TR looks bad - figure out
@@ -175,13 +173,7 @@ scatterplot_frame <- ggplot(plot_rollback %>% filter(Date < date) %>% arrange(Da
 rollback_anim <- animate(scatterplot_frame, fps = 2, width = 1000, height = 800, renderer = gifski_renderer(loop = F))
 save_animation(rollback_anim, file = "../graphs/gifs/scatterplot_fps2.gif")
 
-#-----------.detailed scatter plot
 
-## decide whether to include legend - plot looks better without the legend 
-## calibrate size to newcases instead of Confirmed Cases?
-scatter.SI.rollback.detail(as.Date(date))
-ggsave(paste("../graphs/new-score/detail_scatterSIroll_latest", ".png", sep = ""), width = 10, 
-       height = 8)
 
 
 
