@@ -194,13 +194,17 @@ current.rollback.df <- current.rollback.df %>%
                                 index_name == "openness_risk" ~ "Openness Risk", 
                                 index_name == "test_and_trace" ~ "Test and Trace"))
 
+daily.heatmap.title <- paste("Heatmap of Openness Risk and it's breakdown for", as.Date(date))
 chloro.daily <- ggplot(current.rollback.df, aes(x = index_name, y = forcats::fct_rev(CountryCode), fill = index_value)) +
   geom_tile(width = 0.95, height = 0.9) + 
   scale_fill_viridis_c(name = "Scale (0-1)",na.value = "gray", direction = -1, breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
   theme(axis.text.y = element_text(size = 10), 
-        axis.text.x = element_text(size = 8)) + 
+        axis.text.x = element_text(size = 8),
+        plot.caption = element_text(hjust = 0.0)) + 
   labs(y = "Country Code (ISO-3)", 
-       x = "") +
+       x = "", 
+       caption = "Source: Oxford COVID-19 Government Response Tracker. More at https://github.com/OxCGRT/covid-policy-tracker or bsg.ox.ac.uk/covidtracker", 
+       title = daily.heatmap.title) +
   scale_x_discrete(limits = c("Cases Controlled", "Community Understanding", 
                               "Imported Cases", "Test and Trace", 
                               "Openness Risk"), position = "top") +
