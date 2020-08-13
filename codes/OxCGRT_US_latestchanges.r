@@ -61,7 +61,11 @@ for (indc in indicators) {
   agg_tibble <- bind_rows(agg_tibble, temp_tibble)
 }
 
-agg_tibble <- agg_tibble %>% select(RegionName, RegionCode, indicator_type, Date,past_value, present_value, past_flag, present_flag, Notes)
+agg_tibble <- agg_tibble %>% mutate(present_flag = case_when(present_flag == 1 ~ "G", 
+                                              present_flag == 0 ~ "T"), past_flag = case_when(past_flag == 1 ~ "G", 
+                                    past_flag == 0 ~ "T"))
+
+agg_tibble <- agg_tibble %>% select(RegionName, RegionCode, Date, indicator_type,past_value, past_flag, present_value, present_flag, Notes)
 
 write.csv(agg_tibble, "../data/output/OxCGRT_US_changes.csv")
 
