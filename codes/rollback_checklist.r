@@ -26,7 +26,7 @@ oxcgrtdata <- oxcgrtdata %>% arrange(CountryCode, Date) %>% group_by(CountryCode
 ### Define cases_controlled metric
 ## Compute 7-day rolling avg of cases
 oxcgrtdata <- oxcgrtdata %>% arrange(CountryCode, Date) %>% group_by(CountryCode) %>%
-  mutate(moveave_confirmedcases = zoo::rollmean(ConfirmedCases, k = 7, fill = NA, align = 'right')) %>%
+  mutate(moveave_confirmedcases = zoo::rollmean(ConfirmedCases, k = 7, fill = NA, na.rm = T, align = 'right')) %>%
   mutate(lag_moveave_cases = lag(moveave_confirmedcases, order_by = Date), 
          newcases = ifelse(moveave_confirmedcases - lag_moveave_cases > 0, moveave_confirmedcases - lag_moveave_cases, 0), 
          cases_controlled = ifelse((50-newcases)/50 > 0, (50-newcases)/50, 0)) 
@@ -119,7 +119,8 @@ oxcgrtdata <- oxcgrtdata %>% mutate(newcases_permillion = newcases/(popWB/100000
                                                                newcases_permillion < 200 & !is.na(newcases_permillion) ~ (newcases_permillion - 50)/150)) 
 
 ## recalculating rollback score
-oxcgrtdata <- oxcgrtdata %>% mutate(rollback_score = endemic_factor + (1 - endemic_factor)*rollback_score)
+oxcgrtdata <- oxcgrtdata %>% mutate(openness_risk = endemic_factor + (1 - endemic_factor)*openness_risk)
+write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", sep = ""))
 
 
 ###---------------------End of current code - clean up anything after this-------------------###
