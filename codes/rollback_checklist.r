@@ -113,10 +113,25 @@ write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", 
 #' Endemic factor defined as metric between [0-1] for cases/mill between 50-200
 
 ## creating a cases per million variable
-oxcgrtdata <- View(oxcgrtdata %>% mutate(newcases_permillion = newcases/(popWB/1000000), 
+oxcgrtdata <- oxcgrtdata %>% mutate(newcases_permillion = newcases/(popWB/1000000), 
                                     endemic_factor = case_when(newcases_permillion < 50 ~ 0, 
                                                                newcases_permillion > 200 ~ 1, 
-                                                               newcases_permillion < 200 & !is.na(newcases_permillion) ~ (newcases_permillion - 50)/150)) %>% filter(CountryCode == "USA")) 
+                                                               newcases_permillion < 200 & !is.na(newcases_permillion) ~ (newcases_permillion - 50)/150)) 
+
+## recalculating rollback score
+oxcgrtdata <- oxcgrtdata %>% mutate(rollback_score = endemic_factor + (1 - endemic_factor)*rollback_score)
+
+
+###---------------------End of current code - clean up anything after this-------------------###
+
+
+
+
+
+
+
+
+
 
 # Updating definition of cases_controlled - adding new cases_controlled_100k to record this
 # oxcgrtdata <- oxcgrtdata %>%
