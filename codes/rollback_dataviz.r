@@ -25,6 +25,11 @@ lineplot_rollback <- oxcgrtdata %>%
   mutate(openness_risk = ifelse(openness_risk < 0, 0, openness_risk),
     Date = lubridate::ymd(Date))
 
+##------select key countries to be labelled and charted in line plot---------
+
+country_lineplot <- c("CHN", "KOR", "FRA", "ITA", "GBR", "USA", "NZL", "IND", "GER", "RUS",
+                      "SWE", "AUS", "ZFA", "BRA")
+
 ## for practically all other plots
 plot_rollback <- oxcgrtdata %>% 
   select(CountryCode, region, ConfirmedCases, StringencyIndex, newcases, openness_risk, rollback_score, Date) %>% 
@@ -41,11 +46,6 @@ plot_rollback <- plot_rollback %>% group_by(CountryCode) %>% arrange(CountryCode
          lag5_SI = lag(StringencyIndex, n = 5L),
          lightup_state = ifelse(StringencyIndex < 50 & (lag1_SI >= 50 | lag2_SI >= 50 | lag3_SI >= 50 | lag4_SI >= 50 | lag5_SI >= 50), 1, 0)) %>%
   select(-starts_with("lag"))
-
-##------select key countries to be labelled and charted in line plot---------
-
-country_lineplot <- c("CHN", "KOR", "FRA", "ITA", "GBR", "USA", "NZL", "IND", "GER", "RUS",
-                      "SWE", "AUS", "ZFA", "BRA")
 
 ##----------- HEADLINE LINE PLOT - Panel of 12 countries --------------------
 
