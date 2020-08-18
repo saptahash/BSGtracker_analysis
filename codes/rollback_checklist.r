@@ -109,47 +109,39 @@ oxcgrtdata$rollback_score <- rowMeans(oxcgrtdata[c("community_understanding", "t
 oxcgrtdata <- oxcgrtdata %>% mutate(openness_risk = 1 - rollback_score)
 write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", sep = ""))
 
+## Adding in an endemic factor calculation 
+#' Endemic factor defined as metric between [0-1] for cases/mill between 50-200
 
-
-# ############ Defining how countries have moved out of lockdown 
-# 
-# ## OO lockdown definition -> if stringency index < 35 -> rolled out of lockdown
-# oxcgrtdata$outoflockdown <- ifelse(oxcgrtdata$StringencyIndex <= 35, 1, 0)
-# 
-# ## defining alternative rollback definition for countries that have rolled out of lockdown
-# oxcgrtdata$alt_rollbackscore <- rowMeans(oxcgrtdata[c("test_and_trace", "cases_controlled")], na.rm = T)
-# 
-# ## recoding a new rollback variable for visualisation purposes 
-# oxcgrtdata$recoded_rollback <- ifelse(oxcgrtdata$outoflockdown == 1, 
-#                                       oxcgrtdata$alt_rollbackscore, oxcgrtdata$rollback_score)
-
-write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", sep = ""))
-
+## creating a cases per million variable
+oxcgrtdata <- View(oxcgrtdata %>% mutate(newcases_permillion = newcases/(popWB/1000000), 
+                                    endemic_factor = case_when(newcases_permillion < 50 ~ 0, 
+                                                               newcases_permillion > 200 ~ 1, 
+                                                               newcases_permillion < 200 & !is.na(newcases_permillion) ~ (newcases_permillion - 50)/150)) %>% filter(CountryCode == "USA")) 
 
 # Updating definition of cases_controlled - adding new cases_controlled_100k to record this
-oxcgrtdata <- oxcgrtdata %>%
-  mutate(cases_per100k = newcases/(popWB/100000), 
-         cases_controlled_per100k = case_when(cases_per100k >= 25 ~ 0, 
-                                              cases_per100k < 25 ~ ((25-cases_per100k)/25)))
-
-##------------------OLD INDEX--------------------
-
-# Updating old score to reflect the change in manage_imported cases
-oxcgrtdata$rollback_score <- rowMeans(oxcgrtdata[c("community_understanding", "test_and_trace",
-                                                   "manage_imported_cases", "cases_controlled")], na.rm = T)
-
-oxcgrtdata <- oxcgrtdata %>% mutate(openness_risk = 1 - rollback_score)
-
-##------------------ NEW INDEX---------------------
-
-# Calculating new rollback readiness score
-oxcgrtdata$recoded_rollback <- rowMeans(oxcgrtdata[c("community_understanding", "test_and_trace",
-                                                   "manage_imported_cases", "cases_controlled_per100k")], na.rm = T)
-
-# Invert score to reflect openess risk 
-oxcgrtdata <- oxcgrtdata %>% mutate(openness_risk_new = 1 - recoded_rollback)
-
-write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", sep = ""))
+# oxcgrtdata <- oxcgrtdata %>%
+#   mutate(cases_per100k = newcases/(popWB/100000), 
+#          cases_controlled_per100k = case_when(cases_per100k >= 25 ~ 0, 
+#                                               cases_per100k < 25 ~ ((25-cases_per100k)/25)))
+# 
+# ##------------------OLD INDEX--------------------
+# 
+# # Updating old score to reflect the change in manage_imported cases
+# oxcgrtdata$rollback_score <- rowMeans(oxcgrtdata[c("community_understanding", "test_and_trace",
+#                                                    "manage_imported_cases", "cases_controlled")], na.rm = T)
+# 
+# oxcgrtdata <- oxcgrtdata %>% mutate(openness_risk = 1 - rollback_score)
+# 
+# ##------------------ NEW INDEX---------------------
+# 
+# # Calculating new rollback readiness score
+# oxcgrtdata$recoded_rollback <- rowMeans(oxcgrtdata[c("community_understanding", "test_and_trace",
+#                                                    "manage_imported_cases", "cases_controlled_per100k")], na.rm = T)
+# 
+# # Invert score to reflect openess risk 
+# oxcgrtdata <- oxcgrtdata %>% mutate(openness_risk_new = 1 - recoded_rollback)
+# 
+# write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", sep = ""))
 
 
 
