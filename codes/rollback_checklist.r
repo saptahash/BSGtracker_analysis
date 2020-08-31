@@ -87,7 +87,7 @@ oxcgrtdata <- oxcgrtdata %>% arrange(CountryCode, Date) %>% group_by(CountryCode
          min_apple = roll_min(apple_ave, n = 28L, align = "right", fill = NA, na.rm = T),
          min_google = ifelse(is.infinite(min_google), NA, min_google)) 
 
-oxcgrtdata <- oxcgrtdata %>% mutate(mob = pmin(google_ave, apple_ave, na.rm = T), 
+oxcgrtdata <- oxcgrtdata %>% mutate(mob = pmin(min_apple, min_google, na.rm = T), 
                                     mob = case_when(mob < 20 ~ 20,
                                                     mob > 20 & mob < 120 ~ mob,
                                                     mob > 120 & (is.na(mob) == F) ~ 120))
@@ -121,7 +121,6 @@ oxcgrtdata <- oxcgrtdata %>% mutate(newcases_permillion = newcases/(popWB/100000
 ## recalculating rollback score
 oxcgrtdata <- oxcgrtdata %>% mutate(openness_risk = endemic_factor + (1 - endemic_factor)*openness_risk)
 write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", sep = ""))
-
 
 ###---------------------End of current code - clean up anything after this-------------------###
 
