@@ -10,9 +10,13 @@ library(ggrepel)
 library(gganimate)
 library(plotly)
 library(ggpubr)
+library(feather)
 
 ## Bring in functions file
 source("rollbackviz_fun.r")
+
+## Read the data file
+oxcgrtdata <- read_feather("../data/output/OxCGRT_latest.feather")
 
 ## set theme
 theme_set(theme_gray())
