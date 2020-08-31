@@ -4,6 +4,7 @@
 library(dplyr)
 library(tidyr)
 library(RcppRoll)
+library(feather)
 
 # define global macros
 data_date <- lubridate::today()
@@ -119,10 +120,22 @@ oxcgrtdata <- oxcgrtdata %>% mutate(newcases_permillion = newcases/(popWB/100000
                                                                newcases_permillion < 200 & !is.na(newcases_permillion) ~ (newcases_permillion - 50)/150)) 
 
 ## recalculating rollback score
-oxcgrtdata <- oxcgrtdata %>% mutate(openness_risk = endemic_factor + (1 - endemic_factor)*openness_risk)
+oxcgrtdata <- oxcgrtdata %>% mutate(openness_risk = ifelse(!is.na(endemic_factor), endemic_factor + (1 - endemic_factor)*openness_risk, openness_risk))
 write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", sep = ""))
+write_feather(oxcgrtdata, path = "../data/output/OxCGRT_latest.feather")
+
+## Creating a custom csv file for timeseries 
+ORI_output <- 
+  oxcgrtdata %>%
+  select(CountryCode, CountryName, Date, community_understanding, manage_imported_cases, cases_controlled, test_and_trace,
+         endemic_factor, openness_risk)
+
+write.csv(ORI_output, file = paste("../data/output/ORI_timeseries", data_date, ".csv", sep = ""))
 
 ###---------------------End of current code - clean up anything after this-------------------###
+
+
+
 
 
 
