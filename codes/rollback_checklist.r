@@ -142,10 +142,6 @@ write.csv(ORI_output, file = paste("../data/output/ORI_timeseries", data_date, "
 
 
 
-
-
-
-
 # Updating definition of cases_controlled - adding new cases_controlled_100k to record this
 # oxcgrtdata <- oxcgrtdata %>%
 #   mutate(cases_per100k = newcases/(popWB/100000), 
