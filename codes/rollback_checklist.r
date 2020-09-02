@@ -130,7 +130,7 @@ ORI_output <-
   select(CountryCode, CountryName, Date, community_understanding, manage_imported_cases, cases_controlled, test_and_trace,
          endemic_factor, openness_risk)
 
-write.csv(ORI_output, file = paste("../data/output/ORI_timeseries", data_date, ".csv", sep = ""))
+write.csv(ORI_output, file = paste("../data/output/ORI_timeseries_latest", ".csv", sep = ""))
 
 ###---------------------End of current code - clean up anything after this-------------------###
 
