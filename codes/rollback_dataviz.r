@@ -211,7 +211,7 @@ chloro.daily <- ggplot(current.rollback.df, aes(x = index_name, y = forcats::fct
         axis.text.x = element_text(size = 8),
         plot.caption = element_text(hjust = 0.5, face = "italic"), 
         plot.title = element_text(hjust = 0.5)) + 
-  labs(y = "Country Code (ISO-3)", 
+  labs(y = "Country", 
        x = "", 
        caption = "Source: Oxford COVID-19 Government Response Tracker. More at https://github.com/OxCGRT/covid-policy-tracker or bsg.ox.ac.uk/covidtracker", 
        title = daily.heatmap.title) +
