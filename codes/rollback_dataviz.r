@@ -63,11 +63,13 @@ ggplot(lineplot_rollback %>% filter(CountryCode %in% country_lineplot), aes(x = 
   theme(axis.text.x = element_text(size = 6.5, angle = 20), 
         axis.text.y.right = element_text(colour = "red"), 
         axis.title.y.right = element_text(colour = "red"), 
+        strip.text = element_text(size = 15),
         plot.caption = element_text(hjust = 0.0, face = "italic"), 
         plot.title = element_text(hjust = 0.5)) + 
-  labs(title = "Openness Risk Index and Stringency Index of twelve countries over time",
-       caption = "Source: Oxford COVID-19 Government Response Tracker. More at https://github.com/OxCGRT/covid-policy-tracker 
-       or bsg.ox.ac.uk/covidtracker") + 
+  labs(caption = "Source: Oxford COVID-19 Government Response Tracker. More at https://github.com/OxCGRT/covid-policy-tracker 
+       or bsg.ox.ac.uk/covidtracker"
+#       ,title = "Openness Risk Index and Stringency Index of twelve countries over time"
+       ) + 
   facet_wrap(~ CountryName)
 
 ggsave(paste("../graphs/new-score/lineplot_latest", ".png", sep = ""),
