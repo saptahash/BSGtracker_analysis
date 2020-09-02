@@ -96,7 +96,7 @@ tilemap.regionwise <- function(region_name){
           plot.title = element_text(hjust = 0.5)) +
     labs(x = "Date", 
          y = "Country Code (ISO-3)", 
-         title = tilemap.title,
+#         title = tilemap.title,
          caption = "Source: Oxford COVID-19 Government Response Tracker. More at https://github.com/OxCGRT/covid-policy-tracker or bsg.ox.ac.uk/covidtracker") 
 }
 
@@ -105,11 +105,12 @@ chloropleth.map.summary <- function(dateseq_scatter){
   ggplot(map_df %>% filter(Date %in% dateseq_scatter)) +
     geom_sf(aes(fill = openness_risk)) + 
     ggthemes::theme_map() +
-    labs(title = "Chloropleth Map of countries over time",
+    labs(title = "",
          caption = "Source: Oxford COVID-19 Government Response Tracker. More at https://github.com/OxCGRT/covid-policy-tracker or bsg.ox.ac.uk/covidtracker" ) + 
     theme(plot.title = element_text(hjust = 0.5), 
-          plot.caption = element_text(hjust = 0.0, face = "italic"), 
-          legend.position = "right") +
+          plot.caption = element_text(hjust = 0.5, face = "italic"), 
+          legend.position = "right", 
+          strip.text = element_text(size = 10)) +
     scale_fill_viridis_c(option = "viridis", name = "Openness Risk", na.value = "gray", direction = -1, 
                          breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1.0)) + 
     facet_wrap(~Date)
