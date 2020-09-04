@@ -45,7 +45,7 @@ scatter.SI.rollback <- function(dateseq_scatter){
 
 scatter.SI.rollback.detail <- function(date){
   theme_set(theme_gray())
-  scatter.plot.title <- paste("Stringency Index and Openness Risk as of ", lubridate::as_date(date), sep = "")
+#  scatter.plot.title <- paste("Stringency Index and Openness Risk as of ", lubridate::as_date(date), sep = "")
   ggplot(plot_rollback %>% filter(Date == date), aes(x = openness_risk, color = factor(lightup_state), y = StringencyIndex,label = CountryCode)) +  #color = factor(outoflockdown), 
     geom_point(aes(size = newcases)) + 
     lims(colour = c("0", "1")) + 
@@ -61,14 +61,23 @@ scatter.SI.rollback.detail <- function(date){
     labs(x = "Openness Risk", 
          y = "Stringency Index", 
 #         subtitle = "(Bubble size reflects number of new cases)", 
-         title = scatter.plot.title,
+#         title = scatter.plot.title,
          caption = "Bubble Size reflects number of new cases \n Source: Oxford COVID-19 Government Response Tracker. More at https://github.com/OxCGRT/covid-policy-tracker or bsg.ox.ac.uk/covidtracker") + 
     guides(size = F) + 
 #    viridis::scale_colour_viridis(discrete = T) +
     scale_y_continuous(breaks = c(25, 50, 75, 100)) + 
     scale_x_continuous(breaks = c(seq(from = 0, to = 1, by = 0.2))) +
     scale_colour_discrete(name = "", breaks = c(1), labels = c("Dropped stringency levels in past week")) +
-    scale_size(range = c(3,9))
+    scale_size(range = c(3,9)) + 
+    annotate(geom = "label", x = 1, y = 99, label = "Group 1", 
+             color = "black") +
+    annotate(geom = "label", x = 1, y = 1, label = "Group 2", 
+             color = "red") + 
+    annotate(geom = "label", x = 0, y = 1, label = "Group 3", 
+             color = "black") + 
+    annotate(geom = "label", x = 0, y = 99, label = "Group 3", 
+             color = "black") + 
+    facet_wrap(~Date)
 }
 
 
