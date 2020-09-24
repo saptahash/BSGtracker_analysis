@@ -4,7 +4,7 @@
 
 ### Import and process data exported from OxCGRT database 
 
-
+library(here)
 library(readr)
 library(haven)
 library(tidyverse)
@@ -12,6 +12,7 @@ library(lubridate)
 library(countrycode)
 library(zoo)
 
+here()
 #pwd <<- "C:\Users\sapta\OneDrive\Desktop\oxcgrtRA\BSGtracker_analysis\codes"
 data_date <<- today()
 url_oxcgrt <<- "https://raw.githubusercontent.com/OxCGRT/covid-policy-tracker/master/data/OxCGRT_latest_withnotes.csv"
@@ -21,7 +22,7 @@ oxcgrtdata <- read_csv(url(url_oxcgrt), col_types = cols(RegionName = col_charac
                                                          RegionCode = col_character()))
 #notes - save backup at this point 
 #subset only national data 
-oxcgrtdata <- oxcgrtdata %>% filter(is.na(RegionName))
+oxcgrtdata <- oxcgrtdata %>% filter(is.na(RegionName)) 
 
 #Step 2: Bringing in crossnational correlates
 correlates <- c("popWB",  "hosp_beds_WB", "total_sars", "sars_deaths",
@@ -186,7 +187,7 @@ oxcgrtdata <- oxcgrtdata %>% ungroup() %>%
   mutate(apple_ave = rowMeans(oxcgrtdata[,c("week_apple_transit", "week_apple_driving", "week_apple_walking")]), 
          google_ave = rowMeans(oxcgrtdata[,c("week_goog_retail", "week_goog_transitstations", "week_goog_workplaces")])) 
 
-oxcgrtdata <- oxcgrtdata %>% ungroup() %>% mutate(mobility_ave = rowMeans(oxcgrtdata[,c("apple_ave", "google_ave")], na.rm = T))
+#oxcgrtdata <- oxcgrtdata %>% ungroup() %>% mutate(mobility_ave = rowMeans(oxcgrtdata[,c("apple_ave", "google_ave")], na.rm = T))
 
 write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", sep = ""))
 
@@ -214,7 +215,8 @@ write.csv(owid.data, file = paste("../data/input/testing_", data_date, ".csv", s
 oxcgrtdata <- left_join(oxcgrtdata, owid.data %>% select(countrycode, Date, test_total, test_totalperthou), 
           by = c("Date", "CountryCode"="countrycode"))
 
-oxcgrtdata <- oxcgrtdata %>% mutate(test_percase = test_total/ConfirmedCases)
+oxcgrtdata <- oxcgrtdata %>% mutate(test_percase = ifelse((ConfirmedCases > 0) & (!is.na(ConfirmedCases)), 
+                                                          test_total/ConfirmedCases, NA))
 
 ### new output file with testing data appended
 write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", sep = ""))  
@@ -234,8 +236,6 @@ no.testing.data <- no.testing.data %>% mutate(countrycode = no.testing.data.ccod
 oxcgrtdata <- left_join(oxcgrtdata, no.testing.data %>% select(countrycode, test_nodata), by = c("CountryCode" = "countrycode"))
 
 write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", sep = ""))  
-
-
 
 
 

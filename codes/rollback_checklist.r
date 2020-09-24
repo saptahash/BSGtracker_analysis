@@ -1,11 +1,14 @@
 #### Lockdown Rollback Checklist
 
 # import packages
+library(here)
 library(dplyr)
 library(tidyr)
 library(RcppRoll)
 library(feather)
+library(zoo)
 
+here()
 # define global macros
 data_date <- lubridate::today()
 
@@ -21,13 +24,16 @@ oxcgrtdata <- oxcgrtdata %>% arrange(CountryCode, Date) %>% group_by(CountryCode
          H2_Testing.policy_1 = H2_Testing.policy, 
          C8_International_1 = C8_International.travel.controls,
          H1_Public.info_1 = H1_Public.information.campaigns) %>% 
-  fill(H3_Contact.tracing_1, H2_Testing.policy_1, C8_International_1, H1_Public.info_1)
+  fill(H3_Contact.tracing_1, H2_Testing.policy_1, C8_International_1, H1_Public.info_1) %>% 
+  mutate(ConfirmedCases = na.approx(ConfirmedCases, na.rm = F), 
+         ConfirmedDeaths = na.approx(ConfirmedDeaths, na.rm = F))
 
 
 ### Define cases_controlled metric
 ## Compute 7-day rolling avg of cases
 oxcgrtdata <- oxcgrtdata %>% arrange(CountryCode, Date) %>% group_by(CountryCode) %>%
-  mutate(moveave_confirmedcases = zoo::rollmean(ConfirmedCases, k = 7, fill = NA, na.rm = T, align = 'right')) %>%
+  mutate(moveave_confirmedcases = zoo::rollmean(ConfirmedCases, k = 7, fill = NA, na.rm = T, align = 'right'), 
+         moveave_confirmedcases = ifelse(is.nan(moveave_confirmedcases), NA, moveave_confirmedcases)) %>%
   mutate(lag_moveave_cases = lag(moveave_confirmedcases, order_by = Date), 
          newcases = ifelse(moveave_confirmedcases - lag_moveave_cases > 0, moveave_confirmedcases - lag_moveave_cases, 0), 
          cases_controlled = ifelse((50-newcases)/50 > 0, (50-newcases)/50, 0)) 
@@ -44,14 +50,15 @@ oxcgrtdata <- oxcgrtdata %>% arrange(CountryCode, Date) %>% group_by(CountryCode
 
 # CODE BUG ALERT - Inf handling in test_percase, min_tests and max_tests
 oxcgrtdata <- oxcgrtdata %>% arrange(Date, CountryCode) %>% group_by(Date) %>%
-  mutate(min_tests = min(test_percase, na.rm = T), 
-         max_tests = max(test_percase, na.rm = T)) %>%
-  mutate(test_score = (log(test_percase) - log(min_tests))/(log(max_tests) - log(min_tests)))
+  mutate(min_tests = ifelse(is.finite(min(test_percase, na.rm = T)),min(test_percase, na.rm = T), NA), 
+         max_tests = ifelse(is.finite(max(test_percase, na.rm = T)),max(test_percase, na.rm = T), NA))  %>% 
+  mutate(test_score = ifelse(!is.na(max_tests) & !is.na(min_tests) & (max_tests > 0) & (min_tests > 0) & (max_tests != min_tests), 
+                             (log(test_percase) - log(min_tests))/(log(max_tests) - log(min_tests)), NA))
 
-oxcgrtdata <- oxcgrtdata %>% group_by(Date) %>% mutate(global_mean_test_score = mean(test_score, na.rm = T)) %>% 
-  mutate(test_score = ifelse(is.na(test_score) == T, global_mean_test_score, test_score)) %>%
+oxcgrtdata <- oxcgrtdata %>% group_by(Date) %>% mutate(global_mean_test_score = ifelse(is.finite(mean(test_score, na.rm = T)), mean(test_score, na.rm = T), NA)) %>% 
+  mutate(test_score = ifelse(is.na(test_score), global_mean_test_score, test_score)) %>%
   ungroup() %>%
-  mutate(test_score = ifelse(is.na(test_nodata) == T , test_score, 0))
+  mutate(test_score = ifelse(is.na(test_nodata), test_score, 0))
 
 oxcgrtdata <- oxcgrtdata %>% mutate(test_and_trace = 0.25*H3_Contact.tracing_1/3 + 0.25*H2_Testing.policy_1/2 + 0.5*test_score) 
 
@@ -121,6 +128,11 @@ oxcgrtdata <- oxcgrtdata %>% mutate(newcases_permillion = newcases/(popWB/100000
 
 ## recalculating rollback score
 oxcgrtdata <- oxcgrtdata %>% mutate(openness_risk = ifelse(!is.na(endemic_factor), endemic_factor + (1 - endemic_factor)*openness_risk, openness_risk))
+
+## recalibrating openness index for the start dates 
+oxcgrtdata <- oxcgrtdata %>% 
+  mutate(openness_risk = ifelse(is.na(cases_controlled), NA, openness_risk))
+
 write.csv(oxcgrtdata, file = paste("../data/output/OxCGRT_", data_date, ".csv", sep = ""))
 write_feather(oxcgrtdata, path = "../data/output/OxCGRT_latest.feather")
 
@@ -130,7 +142,7 @@ ORI_output <-
   select(CountryCode, CountryName, Date, community_understanding, manage_imported_cases, cases_controlled, test_and_trace,
          endemic_factor, openness_risk)
 
-write.csv(ORI_output, file = paste("../data/output/ORI_timeseries_latest", ".csv", sep = ""))
+write.csv(ORI_output, file = paste("../data/output/riskindex_timeseries_latest", ".csv", sep = ""))
 
 ###---------------------End of current code - clean up anything after this-------------------###
 

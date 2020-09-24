@@ -2,6 +2,7 @@
 ###---------- DATA VISUALISATION CODE FOR OPENNESS RISK INDEX
 #########################
 
+library(here)
 library("ggplot2")
 library("sf")
 library("rnaturalearth")
@@ -11,7 +12,9 @@ library(gganimate)
 library(plotly)
 library(ggpubr)
 library(feather)
+library(viridis)
 
+here()
 ## Bring in functions file
 source("rollbackviz_fun.r")
 
@@ -24,15 +27,18 @@ theme_set(theme_gray())
 ##-----selecting important columns for further analysis------------------- 
 
 ## To be used to make lineplots
-lineplot_rollback <- oxcgrtdata %>% 
-  select(CountryCode, region, openness_risk, StringencyIndex, CountryName, Date) %>% 
-  mutate(openness_risk = ifelse(openness_risk < 0, 0, openness_risk),
-    Date = lubridate::ymd(Date))
+date <- lubridate::as_date(max(oxcgrtdata$Date)) - 7
 
+lineplot_rollback <- oxcgrtdata %>% 
+  select(CountryCode, region, openness_risk, StringencyIndex, CountryName, cases_controlled, Date) %>% 
+  mutate(openness_risk = ifelse(openness_risk < 0, 0, openness_risk),
+    Date = lubridate::ymd(Date)) %>% 
+  filter(Date <= date)
 ##------select key countries to be labelled and charted in line plot---------
 
+## additionally selecting Spain here to be labelled in scatter plots
 country_lineplot <- c("CHN", "KOR", "FRA", "ITA", "GBR", "USA", "NZL", "IND", "GER", "RUS",
-                      "SWE", "AUS", "ZFA", "BRA")
+                      "SWE", "AUS", "ZFA", "BRA", "ESP")
 
 ## for practically all other plots
 plot_rollback <- oxcgrtdata %>% 
@@ -53,21 +59,26 @@ plot_rollback <- plot_rollback %>% group_by(CountryCode) %>% arrange(CountryCode
 
 ##----------- HEADLINE LINE PLOT - Panel of 12 countries --------------------
 
+## removing Spain from the list so lineplots are still produced for 12 countries
+country_lineplot <- c("CHN", "KOR", "FRA", "ITA", "GBR", "USA", "NZL", "IND", "GER", "RUS",
+                      "SWE", "AUS", "ZFA", "BRA")
+
 ggplot(lineplot_rollback %>% filter(CountryCode %in% country_lineplot), aes(x = Date, group = 1)) + 
   geom_line(aes(y = openness_risk)) + 
   geom_line(aes(y = StringencyIndex/100), colour = "red") + 
   scale_y_continuous(
-    name = "Openness Risk", 
+    name = "Risk of Openness", 
     sec.axis = sec_axis(~.*100, name = "Stringency Index")) + 
-  scale_x_date(breaks = seq.Date(lubridate::ymd(min(lineplot_rollback$Date)), lubridate::ymd(max(lineplot_rollback$Date)),21)) + 
-  theme(axis.text.x = element_text(size = 6.5, angle = 20), 
+  scale_x_date(breaks = seq.Date(lubridate::ymd(min(lineplot_rollback$Date)), lubridate::ymd(date),30), 
+               date_labels = "%d-%b") + 
+  theme(axis.text.x = element_text(size = 6.5), 
         axis.text.y.right = element_text(colour = "red"), 
         axis.title.y.right = element_text(colour = "red"), 
         strip.text = element_text(size = 15),
-        plot.caption = element_text(hjust = 0.0, face = "italic"), 
+        plot.caption = element_text(hjust = 0.5, face = "italic"), 
         plot.title = element_text(hjust = 0.5)) + 
-  labs(caption = "Source: Oxford COVID-19 Government Response Tracker. More at https://github.com/OxCGRT/covid-policy-tracker 
-       or bsg.ox.ac.uk/covidtracker"
+  labs(caption = paste("Data represented until ",date,"\n Source: Oxford COVID-19 Government Response Tracker. More at https://github.com/OxCGRT/covid-policy-tracker 
+       or bsg.ox.ac.uk/covidtracker", sep = "")
 #       ,title = "Openness Risk Index and Stringency Index of twelve countries over time"
        ) + 
   facet_wrap(~ CountryName)
@@ -143,7 +154,7 @@ ggsave(paste("../graphs/new-score/summary_scatterSIroll_latest", ".png", sep = "
 ## -----------------------  HEADLINE DETAILED SCATTER PLOTS ------------------------
 scatter.SI.rollback.detail(as.Date(date))
 
-ggsave(paste("../graphs/new-score/detail_scatterSIroll_latest", ".png", sep = ""), width = 10, 
+ggsave(paste("../graphs/new-score/detail_scatterSIroll_latest", ".png", sep = ""), width = 12, 
        height = 8)
 
 #' CODE NOTES:
@@ -199,14 +210,15 @@ current.rollback.df <- current.rollback.df %>%
   mutate(index_name = case_when(index_name == "cases_controlled" ~ "Cases Controlled", 
                                 index_name == "community_understanding" ~ "Community Understanding", 
                                 index_name == "manage_imported_cases" ~ "Imported Cases", 
-                                index_name == "openness_risk" ~ "Openness Risk",
+                                index_name == "openness_risk" ~ "Risk of Openness",
                                 index_name == "test_and_trace" ~ "Test and Trace"))
 
-daily.heatmap.title <- paste("Heatmap of Openness Risk and it's breakdown for", as.Date(date))
+daily.heatmap.title <- paste("Heatmap of Risk of Openness and it's breakdown for", as.Date(date))
 chloro.daily <- ggplot(current.rollback.df, aes(x = index_name, y = forcats::fct_rev(CountryName), fill = index_value)) +
   geom_tile(width = 0.95, height = 0.9) + 
   theme_classic() +
   scale_fill_viridis_c(name = "Scale (0-1)",na.value = "gray", direction = -1, breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
+  #scale_fill_viridis_c()#name = "Scale (0-1)") + #,na.value = "gray", direction = -1, breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
   theme(axis.text.y = element_text(size = 10), 
         axis.text.x = element_text(size = 8),
         plot.caption = element_text(hjust = 0.5, face = "italic"), 
@@ -217,7 +229,7 @@ chloro.daily <- ggplot(current.rollback.df, aes(x = index_name, y = forcats::fct
        title = daily.heatmap.title) +
   scale_x_discrete(limits = c("Cases Controlled", "Community Understanding", 
                               "Imported Cases", "Test and Trace", 
-                              "Openness Risk"), position = "top")
+                              "Risk of Openness"), position = "top")
 
 ggsave(paste("../graphs/new-score/dailytilemap_latest", ".png", sep = ""), width = 10, 
        height = 25, plot = chloro.daily)
@@ -643,11 +655,6 @@ ggsave(paste("../graphs/new-score/chloropleth_latest", ".png", sep = ""), width 
 # #        y = "Country Code (ISO-3)")
 
 ## generating and saving tile map
-
-
-
-
-
 
 
 
