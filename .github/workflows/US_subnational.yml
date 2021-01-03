@@ -30,12 +30,11 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Commit changes
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add .
-          git diff-index --quiet HEAD || git commit -m "Pull latest OxCGRT US non-imputed subnational data" -a
-          
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+         git config --local user.email "action@github.com"
+         git config --local user.name "GitHub Action"
+         git add .
+         git diff-index --quiet HEAD || git commit -m "OxCGRT Data Update" -a
+         git push origin master:master      - name: Push changes
+#        uses: ad-m/github-push-action@master
+#        with:
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
