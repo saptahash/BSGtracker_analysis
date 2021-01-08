@@ -21,7 +21,7 @@ jobs:
                           run: |
                             ls
                             echo 'Starting data prep code'
-                            Rscript -e codes/H7_latestchanges.R
+                            Rscript -e 'codes/H7_latestchanges.R'
                         - name: Commit changes
                           run: |
                             ls
