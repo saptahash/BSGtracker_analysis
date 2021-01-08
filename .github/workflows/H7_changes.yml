@@ -1,7 +1,7 @@
 name: An R workflow to automate H7 latest changes csv 
-on: push
-#        schedule:
-#                - cron: '0 * * * *'
+on:
+        schedule:
+                - cron: '0 * * * *'
 
 jobs: 
         build:
