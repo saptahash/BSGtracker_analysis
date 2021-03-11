@@ -1,7 +1,7 @@
 name: An R workflow to automate H7 latest changes csv 
-on:
-        schedule:
-                - cron: '0 */4 * * *'
+on: push
+#        schedule:
+#                - cron: '0 */4 * * *'
 
 jobs: 
         build:
@@ -23,6 +23,9 @@ jobs:
                             echo 'Starting data prep code'
                             chmod +x 'codes/H7_latestchanges.R'
                             Rscript 'codes/H7_latestchanges.R'
+                            echo 'Starting CAN subnat regional changes code'
+                            chmod +x 'codes/oxcgrt_CAN_regionalchanges.R'
+                            Rscript 'codes/oxcgrt_CAN_regionalchanges.R'
                         - name: Commit changes
                           run: |
                             ls
@@ -30,7 +33,7 @@ jobs:
                             git config --local user.email "action@github.com"
                             git config --local user.name "GitHub Action"
                             git add .
-                            git diff-index --quiet HEAD || git commit -m "Adding latest H7 changes" -a
+                            git diff-index --quiet HEAD || git commit -m "Adding latest H7 and CAN changes" -a
                         - name: Push changes
                           uses: ad-m/github-push-action@master
                           with:
