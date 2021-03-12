@@ -3,6 +3,9 @@ library(tidyverse)
 library(lubridate)
 
 #importing data
+oxcgrtdata <- fread("https://raw.githubusercontent.com/OxCGRT/covid-policy-tracker/master/data/OxCGRT_latest_withnotes.csv")
+oxcgrtdata <- as.data.frame(oxcgrtdata)
+
 oxcgrt_can <- 
   oxcgrtdata %>%
   filter(RegionName != "" & CountryCode == "CAN") %>%
